@@ -1,0 +1,311 @@
+# Authentication API
+
+Base URL: `/api/v1/auth`
+
+All authentication endpoints return a consistent JSON envelope:
+
+**Success**
+
+```json
+{
+    "success": true,
+    "message": "...",
+    "data": {}
+}
+```
+
+**Error**
+
+```json
+{
+    "success": false,
+    "message": "...",
+    "errors": {}
+}
+```
+
+Authenticated endpoints require a Sanctum bearer token:
+
+```
+Authorization: Bearer {token}
+```
+
+Tokens are Laravel Sanctum personal access tokens. Each login call creates a new token named after the supplied `device_name`, so a user can hold one active token per device (Android Phone, iPhone, Tablet, ...). Logout only revokes the token used for the current request.
+
+---
+
+## POST /api/v1/auth/login
+
+Authenticate with a phone number and password and receive a bearer token.
+
+- **Auth required:** No
+- **Headers:** `Accept: application/json`
+
+### Request body
+
+| Field         | Type   | Rules                                                    |
+| ------------- | ------ | -------------------------------------------------------- |
+| `phone`       | string | required, normalized to `+60XXXXXXXXX` before validation |
+| `password`    | string | required                                                 |
+| `device_name` | string | required, max 150 chars                                  |
+
+```json
+{
+    "phone": "0123456789",
+    "password": "password123",
+    "device_name": "Android Phone"
+}
+```
+
+Phone numbers are normalized through a shared `PhoneNumberNormalizer` service before lookup, so `0123456789`, `60123456789`, and `+60123456789` all resolve to the same account (`+60123456789`).
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Login successful.",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "John Doe",
+            "phone": "+60123456789",
+            "email": null,
+            "user_type": "student",
+            "status": "active",
+            "phone_verified_at": null,
+            "last_login_at": "2026-09-12T10:00:00.000000Z"
+        },
+        "token": "1|abcdef...",
+        "token_type": "Bearer"
+    }
+}
+```
+
+### Error responses
+
+| Status | Cause                                                                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 401    | Phone not found, wrong password, or account not `active` — always the generic message below, so a client cannot tell which case occurred |
+| 422    | Missing/invalid `phone`, `password`, or `device_name`                                                                                    |
+
+```json
+{
+    "success": false,
+    "message": "Invalid phone number or password.",
+    "errors": {}
+}
+```
+
+### Business rules
+
+- The user must exist, have a password set, and have `status = active`; otherwise the same generic 401 is returned for every case (no phone-number enumeration).
+- `last_login_at` is updated on every successful login.
+- The client-supplied `user_type` is never trusted; `user_type` always comes from the stored user record.
+
+---
+
+## POST /api/v1/auth/logout
+
+Revoke the token used to authenticate the current request.
+
+- **Auth required:** Yes (`auth:sanctum`)
+- **Headers:** `Authorization: Bearer {token}`
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Logout successful.",
+    "data": null
+}
+```
+
+### Error responses
+
+| Status | Cause                           |
+| ------ | ------------------------------- |
+| 401    | Missing or invalid bearer token |
+
+### Business rules
+
+- Only `currentAccessToken()` is deleted. Other devices' tokens remain valid.
+
+---
+
+## GET /api/v1/auth/me
+
+Return the currently authenticated user.
+
+- **Auth required:** Yes (`auth:sanctum`)
+- **Headers:** `Authorization: Bearer {token}`
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Authenticated user retrieved successfully.",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "John Doe",
+            "phone": "+60123456789",
+            "email": null,
+            "user_type": "student",
+            "status": "active",
+            "phone_verified_at": null,
+            "last_login_at": "2026-09-12T10:00:00.000000Z"
+        }
+    }
+}
+```
+
+### Error responses
+
+| Status | Cause                           |
+| ------ | ------------------------------- |
+| 401    | Missing or invalid bearer token |
+
+The user is always resolved from the authenticated token (`$request->user()`); there is no way to request another user's profile through this endpoint.
+
+---
+
+## POST /api/v1/auth/change-password
+
+Change the password for the authenticated user.
+
+- **Auth required:** Yes (`auth:sanctum`)
+- **Headers:** `Authorization: Bearer {token}`
+
+### Request body
+
+| Field                   | Type   | Rules                                                             |
+| ----------------------- | ------ | ----------------------------------------------------------------- |
+| `current_password`      | string | required                                                          |
+| `password`              | string | required, confirmed, Laravel default password rules (min 8 chars) |
+| `password_confirmation` | string | required, must match `password`                                   |
+
+```json
+{
+    "current_password": "oldPassword123",
+    "password": "newPassword123",
+    "password_confirmation": "newPassword123"
+}
+```
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Password changed successfully.",
+    "data": null
+}
+```
+
+### Error responses
+
+| Status | Cause                                                                           |
+| ------ | ------------------------------------------------------------------------------- |
+| 422    | `current_password` is incorrect (`"message": "Current password is incorrect."`) |
+| 422    | Validation failure (missing fields, weak password, confirmation mismatch)       |
+| 401    | Missing or invalid bearer token                                                 |
+
+### Business rules
+
+- The new password is hashed via Laravel's `hashed` cast before saving.
+- All other Sanctum tokens belonging to the user are revoked; the token used to make this request remains valid.
+
+---
+
+## POST /api/v1/auth/set-password
+
+Allow a user who does not yet have a usable password (e.g. created by an administrator) to establish their first password.
+
+- **Auth required:** Yes (`auth:sanctum`)
+- **Headers:** `Authorization: Bearer {token}`
+
+### Request body
+
+| Field                   | Type   | Rules                                                             |
+| ----------------------- | ------ | ----------------------------------------------------------------- |
+| `password`              | string | required, confirmed, Laravel default password rules (min 8 chars) |
+| `password_confirmation` | string | required, must match `password`                                   |
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Password set successfully.",
+    "data": null
+}
+```
+
+### Error responses
+
+| Status | Cause                                                                                                                                                                  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 422    | The account already has a password set (`"message": "A password has already been set for this account. Use change-password instead."`) — use `change-password` instead |
+| 422    | Validation failure                                                                                                                                                     |
+| 401    | Missing or invalid bearer token                                                                                                                                        |
+
+### Business rules
+
+- Only usable when `users.password` is `NULL`. This is the intentional signal that an account has not completed initial password setup; the column is nullable specifically to support this flow.
+
+---
+
+## POST /api/v1/auth/refresh-token
+
+Rotate the token used to authenticate the current request.
+
+- **Auth required:** Yes (`auth:sanctum`)
+- **Headers:** `Authorization: Bearer {token}`
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Token refreshed successfully.",
+    "data": {
+        "token": "2|ghijkl...",
+        "token_type": "Bearer"
+    }
+}
+```
+
+### Error responses
+
+| Status | Cause                           |
+| ------ | ------------------------------- |
+| 401    | Missing or invalid bearer token |
+
+### Why this is a rotation, not a classic "refresh"
+
+Laravel Sanctum personal access tokens are simple bearer tokens: they don't expire on a fixed schedule and there is no refresh-token/access-token pair like OAuth2 or JWT. There is nothing to "exchange" ahead of expiry.
+
+To still provide a meaningful endpoint at this URL without faking a refresh flow, `refresh-token` performs **token rotation**: it requires the current valid token, deletes it, and issues a brand-new token with the same device name. This lets a client periodically rotate its credential (e.g. after a suspected leak, or as routine hygiene) without a full re-login. It is a real, working operation — just not "refresh" in the JWT sense.
+
+---
+
+## Phone number normalization
+
+`App\Services\PhoneNumberNormalizer::normalize()` is a small, stateless, reusable helper (not tied to authentication) so any future registration or admin-user-creation flow can normalize phone numbers the same way:
+
+| Input          | Normalized     |
+| -------------- | -------------- |
+| `0123456789`   | `+60123456789` |
+| `60123456789`  | `+60123456789` |
+| `+60123456789` | `+60123456789` |
+
+It strips all non-digit characters, replaces a leading `0` with `60`, assumes a bare local number should be prefixed with `60`, and always returns the number with a leading `+`.
+
+---
+
+## Rate limiting
+
+No rate limiting has been added in this phase. This Laravel version does not attach a default `throttle` middleware to the `api` group automatically, and none has been configured for these routes. If per-endpoint throttling (e.g. stricter limits on `/login`) is required, add `->middleware('throttle:login')` with a matching `RateLimiter::for('login', ...)` definition and document it here.
