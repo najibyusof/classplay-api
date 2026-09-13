@@ -99,39 +99,45 @@ Detailed documentation is available in the [`docs/`](docs/) directory:
 ### Installation Steps
 
 1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/najibyusof/classpay-api.git
-   cd classpay-api
-   ```
+
+    ```bash
+    git clone https://github.com/najibyusof/classpay-api.git
+    cd classpay-api
+    ```
 
 2. **Install PHP dependencies**:
-   ```bash
-   composer install
-   ```
+
+    ```bash
+    composer install
+    ```
 
 3. **Configure Environment File**:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
 4. **Configure Database & Run Migrations**:
    Update `.env` with your database credentials, then run:
-   ```bash
-   php artisan migrate --seed
-   ```
+
+    ```bash
+    php artisan migrate --seed
+    ```
 
 5. **Start Local Development Server**:
-   ```bash
-   php artisan serve
-   ```
-   The API will be available at `http://localhost:8000/api/v1/health`.
+
+    ```bash
+    php artisan serve
+    ```
+
+    The API will be available at `http://localhost:8000/api/v1/health`.
 
 6. **Start Queue Worker & Scheduler (Optional for background processing)**:
-   ```bash
-   php artisan queue:work
-   php artisan schedule:work
-   ```
+    ```bash
+    php artisan queue:work
+    php artisan schedule:work
+    ```
 
 ---
 
