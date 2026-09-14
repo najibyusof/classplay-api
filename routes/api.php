@@ -32,6 +32,10 @@ Route::prefix('v1')->name('v1.')->group(function () {
 
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login')->name('login');
+        Route::post('/register/{userType}', [AuthController::class, 'register'])
+            ->whereIn('userType', ['admin', 'student', 'sponsor'])
+            ->middleware('throttle:registration')
+            ->name('register');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

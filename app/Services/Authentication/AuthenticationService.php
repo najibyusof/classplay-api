@@ -15,6 +15,26 @@ class AuthenticationService
     /**
      * @return array{user: User, token: string}
      */
+    public function register(string $name, string $phone, ?string $email, string $password, string $userType, string $deviceName): array
+    {
+        $user = User::query()->create([
+            'name' => $name,
+            'phone' => PhoneNumberNormalizer::normalize($phone),
+            'email' => $email,
+            'password' => $password,
+            'user_type' => $userType,
+            'status' => 'active',
+        ]);
+
+        return [
+            'user' => $user,
+            'token' => $user->createToken($deviceName)->plainTextToken,
+        ];
+    }
+
+    /**
+     * @return array{user: User, token: string}
+     */
     public function login(string $phone, string $password, string $deviceName): array
     {
         $user = User::query()

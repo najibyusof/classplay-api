@@ -325,4 +325,47 @@ class AuthenticationTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 1);
         $this->assertNotSame($token->plainTextToken, $response->json('data.token'));
     }
+
+    public function test_admin_student_and_sponsor_can_register_with_role_specific_endpoints(): void
+    {
+        foreach (['admin', 'student', 'sponsor'] as $index => $userType) {
+            $response = $this->postJson('/api/v1/auth/register/'.$userType, [
+                'name' => ucfirst($userType).' User',
+                'phone' => '+601234567'.(80 + $index),
+                'email' => $userType.'@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ]);
+
+            $response->assertCreated()
+                ->assertJson([
+                    'success' => true,
+                    'message' => 'Registration successful.',
+                    'data' => [
+                        'user' => ['user_type' => $userType, 'status' => 'active'],
+                        'token_type' => 'Bearer',
+                    ],
+                ])
+                ->assertJsonStructure(['data' => ['user' => ['id', 'name', 'phone'], 'token', 'token_type']])
+                ->assertJsonMissingPath('data.user.password');
+
+            $user = User::query()->where('phone', '+601234567'.(80 + $index))->firstOrFail();
+
+            $this->assertTrue(Hash::check('password123', $user->password));
+            $this->assertTrue($user->hasRole(strtoupper($userType)));
+        }
+    }
+
+    public function test_registration_requires_matching_password_confirmation_and_unique_phone(): void
+    {
+        $this->createUser(['phone' => '+60123456789']);
+
+        $this->postJson('/api/v1/auth/register/student', [
+            'name' => 'New Student',
+            'phone' => '+60123456789',
+            'password' => 'password123',
+            'password_confirmation' => 'different-password',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['phone', 'password']);
+    }
 }

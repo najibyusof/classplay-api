@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Services\Authentication\AuthenticationService;
@@ -31,6 +32,24 @@ class AuthController extends Controller
             'token' => $result['token'],
             'token_type' => 'Bearer',
         ], 'Login successful.');
+    }
+
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $result = $this->authenticationService->register(
+            $request->string('name')->toString(),
+            $request->string('phone')->toString(),
+            $request->input('email'),
+            $request->string('password')->toString(),
+            $request->string('user_type')->toString(),
+            $request->string('device_name', 'mobile-app')->toString(),
+        );
+
+        return $this->successResponse([
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+            'token_type' => 'Bearer',
+        ], 'Registration successful.', 201);
     }
 
     public function logout(Request $request): JsonResponse

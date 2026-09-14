@@ -32,6 +32,81 @@ Authorization: Bearer {token}
 
 Tokens are Laravel Sanctum personal access tokens. Each login call creates a new token named after the supplied `device_name`, so a user can hold one active token per device (Android Phone, iPhone, Tablet, ...). Logout only revokes the token used for the current request.
 
+## POST /api/v1/auth/register/{userType}
+
+Create an active account and immediately receive a Sanctum bearer token. The `{userType}` path value must be `admin`, `student`, or `sponsor`.
+
+- **Auth required:** No
+- **Rate limit:** 3 registration requests per minute per IP address
+- **Headers:** `Accept: application/json`
+
+### Request body
+
+| Field                   | Type   | Rules                                                  |
+| ----------------------- | ------ | ------------------------------------------------------ |
+| `name`                  | string | required, max 150 characters                           |
+| `phone`                 | string | required, normalized to `+60XXXXXXXXX`, unique         |
+| `email`                 | string | optional, valid email, max 150 characters              |
+| `password`              | string | required, minimum 8 characters                         |
+| `password_confirmation` | string | must match `password`                                  |
+| `device_name`           | string | optional, max 150 characters; defaults to `mobile-app` |
+
+Example for the admin account screen:
+
+```http
+POST /api/v1/auth/register/admin
+Content-Type: application/json
+```
+
+```json
+{
+    "name": "Admin User",
+    "phone": "0123456789",
+    "email": "admin@example.com",
+    "password": "password123",
+    "password_confirmation": "password123",
+    "device_name": "Admin Mobile App"
+}
+```
+
+Use the same request body with `/register/student` or `/register/sponsor` for the other account types. The server derives `user_type` from the URL; clients must not send it as a body field.
+
+### Success response — 201
+
+The response uses the same `user`, `token`, and `token_type` shape as login:
+
+```json
+{
+    "success": true,
+    "message": "Registration successful.",
+    "data": {
+        "user": {
+            "id": 10,
+            "name": "Admin User",
+            "phone": "+60123456789",
+            "email": "admin@example.com",
+            "user_type": "admin",
+            "status": "active",
+            "phone_verified_at": null,
+            "last_login_at": null
+        },
+        "token": "10|abcdef...",
+        "token_type": "Bearer"
+    }
+}
+```
+
+The password is hashed and never returned. Registration also synchronizes the matching RBAC role (`ADMIN`, `STUDENT`, or `SPONSOR`). Phone verification is not performed by this endpoint; `phone_verified_at` remains null until a verification flow is introduced.
+
+### Error responses
+
+| Status | Cause                                                                                  |
+| ------ | -------------------------------------------------------------------------------------- |
+| 422    | Missing or invalid fields, mismatched password confirmation, or duplicate phone number |
+| 429    | More than 3 registration requests from the same IP in one minute                       |
+
+Admin registration is intentionally exposed as a public registration path for the admin mobile onboarding flow. If production deployment should restrict who can create administrators, this endpoint must be placed behind an invitation or approval mechanism before release.
+
 ---
 
 ## POST /api/v1/auth/login

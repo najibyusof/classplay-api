@@ -33,6 +33,7 @@ Welcome to the ClassPay Laravel API backend documentation. The ClassPay API is a
 | **Push Notifications**           | [../notifications/push-notifications.md](../notifications/push-notifications.md)       | Device token registration, FCM delivery engine, Flutter deep-link contract               |
 | **Admin Dashboard**              | [dashboard.md](dashboard.md)                                                           | Aggregated metrics, organization statistics, financial totals, recent activity           |
 | **Payment Reports**              | [reports.md](reports.md)                                                               | Payment audit listings, summary reports, outstanding & overdue schedule reports          |
+| **Admin API Reference**          | [admin.md](admin.md)                                                                   | Complete admin endpoint inventory and mobile-client integration checklist                |
 | **Security Hardening**           | [../security/security-hardening.md](../security/security-hardening.md)                 | Security posture, IDOR protection, mass assignment rules, rate limiting, logging safety  |
 | **Queue & Scheduler**            | [../infrastructure/queues-and-scheduler.md](../infrastructure/queues-and-scheduler.md) | Asynchronous jobs, database queue driver, cron worker configuration                      |
 
