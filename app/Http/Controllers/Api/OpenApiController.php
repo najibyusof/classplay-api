@@ -138,6 +138,8 @@ class OpenApiController
     {
         $name = (string) $route->getName();
         $schema = match (true) {
+            str_ends_with($name, 'auth.forgot-password') => ['$ref' => '#/components/schemas/ForgotPasswordRequest'],
+            str_ends_with($name, 'auth.reset-password') => ['$ref' => '#/components/schemas/ResetPasswordRequest'],
             str_ends_with($name, 'auth.register') => ['$ref' => '#/components/schemas/RegisterRequest'],
             str_ends_with($name, 'auth.login') => ['$ref' => '#/components/schemas/LoginRequest'],
             str_ends_with($name, 'auth.change-password') => ['$ref' => '#/components/schemas/ChangePasswordRequest'],
@@ -241,6 +243,23 @@ class OpenApiController
                     'success' => ['type' => 'boolean', 'example' => false],
                     'message' => ['type' => 'string', 'example' => 'The given data was invalid.'],
                     'errors' => ['type' => 'object', 'additionalProperties' => ['type' => 'array', 'items' => ['type' => 'string']]],
+                ],
+            ],
+            'ForgotPasswordRequest' => [
+                'type' => 'object',
+                'required' => ['email'],
+                'properties' => [
+                    'email' => ['type' => 'string', 'format' => 'email', 'example' => 'user@example.com'],
+                ],
+            ],
+            'ResetPasswordRequest' => [
+                'type' => 'object',
+                'required' => ['token', 'email', 'password', 'password_confirmation'],
+                'properties' => [
+                    'token' => ['type' => 'string', 'example' => 'reset-token-from-email'],
+                    'email' => ['type' => 'string', 'format' => 'email', 'example' => 'user@example.com'],
+                    'password' => ['type' => 'string', 'format' => 'password', 'minLength' => 8],
+                    'password_confirmation' => ['type' => 'string', 'format' => 'password'],
                 ],
             ],
             'AuthResponse' => [
@@ -356,13 +375,6 @@ class OpenApiController
             '422' => $this->errorResponse('Validation or business rule error'),
         ];
 
-        if (in_array('POST', $route->methods(), true) && $successStatus !== 201) {
-            $responses['201'] = [
-                'description' => 'Resource created',
-                'content' => ['application/json' => ['schema' => $this->successSchema($route)]],
-            ];
-        }
-
         return $responses;
     }
 
@@ -428,7 +440,7 @@ class OpenApiController
             return ['$ref' => '#/components/schemas/PaginatedResponse'];
         }
 
-        if (str_ends_with($name, '.destroy') || str_ends_with($name, '.logout') || str_ends_with($name, '.read-all')) {
+        if (str_ends_with($name, '.destroy') || str_ends_with($name, '.logout') || str_ends_with($name, '.read-all') || str_ends_with($name, '.forgot-password') || str_ends_with($name, '.reset-password')) {
             return ['$ref' => '#/components/schemas/ApiNullSuccessResponse'];
         }
 

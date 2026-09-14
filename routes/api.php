@@ -36,6 +36,8 @@ Route::prefix('v1')->name('v1.')->group(function () {
             ->whereIn('userType', ['admin', 'student', 'sponsor'])
             ->middleware('throttle:registration')
             ->name('register');
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset')->name('forgot-password');
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset')->name('reset-password');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

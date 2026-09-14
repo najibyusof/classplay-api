@@ -7,6 +7,7 @@ This document is the endpoint checklist for an admin-capable mobile client. It d
 - **Base URL:** `/api/v1`
 - **Authentication:** `Authorization: Bearer {token}` from `POST /api/v1/auth/login`
 - **Account registration:** `POST /api/v1/auth/register/admin`, `/register/student`, or `/register/sponsor`; see [authentication.md](authentication.md)
+- **Password recovery:** `POST /api/v1/auth/forgot-password` followed by `POST /api/v1/auth/reset-password`; see [authentication.md](authentication.md)
 - **Content type:** `application/json`, except file-upload endpoints, which use `multipart/form-data`
 - **Date format:** `YYYY-MM-DD` for date-only filters and fields; timestamps are ISO 8601 strings
 - **Money:** send decimal numbers; display values returned by the API as decimal strings with two places

@@ -28,6 +28,10 @@ class SwaggerDocumentationTest extends TestCase
             ->assertJsonPath('components.securitySchemes.sanctumBearer.type', 'http')
             ->assertJsonPath('paths./auth/login.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/LoginRequest')
             ->assertJsonPath('paths./auth/login.post.responses.200.content.application/json.schema.$ref', '#/components/schemas/AuthResponse')
+            ->assertJsonPath('paths./auth/forgot-password.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/ForgotPasswordRequest')
+            ->assertJsonPath('paths./auth/forgot-password.post.responses.200.content.application/json.schema.$ref', '#/components/schemas/ApiNullSuccessResponse')
+            ->assertJsonPath('paths./auth/reset-password.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/ResetPasswordRequest')
+            ->assertJsonPath('paths./auth/reset-password.post.responses.200.content.application/json.schema.$ref', '#/components/schemas/ApiNullSuccessResponse')
             ->assertJsonPath('paths./auth/register/{userType}.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/RegisterRequest')
             ->assertJsonPath('paths./auth/register/{userType}.post.responses.201.content.application/json.schema.$ref', '#/components/schemas/AuthResponse')
             ->assertJsonPath('paths./payment-schedules/{paymentSchedule}/payments.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/StorePaymentRequest')
@@ -47,6 +51,7 @@ class SwaggerDocumentationTest extends TestCase
         $this->assertArrayHasKey('/admin/dashboard', $response->json('paths'));
         $this->assertArrayHasKey('LoginRequest', $response->json('components.schemas'));
         $this->assertArrayHasKey('AuthResponse', $response->json('components.schemas'));
+        $this->assertArrayHasKey('ResetPasswordRequest', $response->json('components.schemas'));
         $this->assertArrayHasKey('ApiErrorResponse', $response->json('components.schemas'));
         $this->assertArrayHasKey('PaymentWebhookRequest', $response->json('components.schemas'));
         $this->assertTrue($response->json('paths./admin/dashboard.get.security.0.sanctumBearer') === []);

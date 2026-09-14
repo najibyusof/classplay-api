@@ -109,6 +109,79 @@ Admin registration is intentionally exposed as a public registration path for th
 
 ---
 
+## POST /api/v1/auth/forgot-password
+
+Request a password-reset link by email. This endpoint does not require authentication and always returns the same successful response whether or not the email belongs to an account.
+
+- **Auth required:** No
+- **Rate limit:** 5 requests per minute per IP address
+
+### Request body
+
+```json
+{
+    "email": "user@example.com"
+}
+```
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "If the account exists, a password reset link has been sent.",
+    "data": null
+}
+```
+
+The reset notification is sent through Laravel's configured mailer. The link contains a short-lived, single-use broker token. Configure `MAIL_*` values and `APP_URL` before using this endpoint outside local development.
+
+### Error responses
+
+| Status | Cause                                               |
+| ------ | --------------------------------------------------- |
+| 422    | Missing or invalid email                            |
+| 429    | More than 5 requests from the same IP in one minute |
+
+## POST /api/v1/auth/reset-password
+
+Consume the token from the reset email and set a new password. This endpoint does not require authentication.
+
+- **Auth required:** No
+- **Rate limit:** 5 requests per minute per IP address
+
+### Request body
+
+```json
+{
+    "email": "user@example.com",
+    "token": "reset-token-from-email",
+    "password": "newPassword123",
+    "password_confirmation": "newPassword123"
+}
+```
+
+### Success response — 200
+
+```json
+{
+    "success": true,
+    "message": "Password reset successfully.",
+    "data": null
+}
+```
+
+All existing Sanctum tokens for the account are revoked after a successful reset, so mobile clients must log in again. The reset token expires according to `config/auth.php` (currently 60 minutes) and cannot be reused.
+
+### Error responses
+
+| Status | Cause                                                                                       |
+| ------ | ------------------------------------------------------------------------------------------- |
+| 422    | Missing or invalid fields, weak password, mismatched confirmation, or invalid/expired token |
+| 429    | More than 5 requests from the same IP in one minute                                         |
+
+---
+
 ## POST /api/v1/auth/login
 
 Authenticate with a phone number and password and receive a bearer token.

@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +18,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'phone', 'email', 'password', 'user_type', 'status', 'telegram_chat_id'])]
 #[Hidden(['password'])]
-class User extends Authenticatable
+class User extends Authenticatable implements CanResetPassword
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
@@ -198,5 +200,15 @@ class User extends Authenticatable
         $role = Role::query()->firstOrCreate(['name' => strtoupper($this->user_type)]);
 
         $this->roles()->syncWithoutDetaching([$role->id]);
+    }
+
+    public function getEmailForPasswordReset(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

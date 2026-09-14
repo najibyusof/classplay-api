@@ -8,6 +8,7 @@ use App\Exceptions\Auth\PasswordAlreadySetException;
 use App\Models\User;
 use App\Services\PhoneNumberNormalizer;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthenticationService
@@ -55,6 +56,22 @@ class AuthenticationService
     public function logout(PersonalAccessToken $token): void
     {
         $token->delete();
+    }
+
+    public function sendResetLink(string $email): string
+    {
+        return Password::broker()->sendResetLink(['email' => $email]);
+    }
+
+    public function resetPassword(string $email, string $token, string $password): string
+    {
+        return Password::broker()->reset(
+            ['email' => $email, 'token' => $token, 'password' => $password, 'password_confirmation' => $password],
+            function (User $user, string $password): void {
+                $user->forceFill(['password' => $password])->save();
+                $user->tokens()->delete();
+            },
+        );
     }
 
     public function changePassword(User $user, string $currentPassword, string $newPassword, ?int $currentTokenId): void
