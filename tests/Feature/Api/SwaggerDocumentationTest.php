@@ -25,7 +25,11 @@ class SwaggerDocumentationTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('openapi', '3.0.3')
             ->assertJsonPath('components.securitySchemes.sanctumBearer.type', 'http')
+            ->assertJsonPath('paths./auth/login.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/LoginRequest')
+            ->assertJsonPath('paths./payment-schedules/{paymentSchedule}/payments.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/StorePaymentRequest')
+            ->assertJsonPath('paths./payments/{payment}/proofs.post.requestBody.content.multipart/form-data.schema.$ref', '#/components/schemas/PaymentProofUploadRequest')
             ->assertJsonStructure([
+                'servers',
                 'info',
                 'paths',
                 'components' => ['securitySchemes'],
@@ -34,6 +38,8 @@ class SwaggerDocumentationTest extends TestCase
         $this->assertArrayHasKey('/health', $response->json('paths'));
         $this->assertArrayHasKey('/auth/login', $response->json('paths'));
         $this->assertArrayHasKey('/admin/dashboard', $response->json('paths'));
+        $this->assertArrayHasKey('LoginRequest', $response->json('components.schemas'));
+        $this->assertArrayHasKey('PaymentWebhookRequest', $response->json('components.schemas'));
         $this->assertTrue($response->json('paths./admin/dashboard.get.security.0.sanctumBearer') === []);
     }
 }
