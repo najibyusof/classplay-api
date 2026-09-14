@@ -138,6 +138,7 @@ class OpenApiController
     {
         $name = (string) $route->getName();
         $schema = match (true) {
+            str_ends_with($name, 'auth.register') => ['$ref' => '#/components/schemas/RegisterRequest'],
             str_ends_with($name, 'auth.login') => ['$ref' => '#/components/schemas/LoginRequest'],
             str_ends_with($name, 'auth.change-password') => ['$ref' => '#/components/schemas/ChangePasswordRequest'],
             str_ends_with($name, 'auth.set-password') => ['$ref' => '#/components/schemas/SetPasswordRequest'],
@@ -215,8 +216,113 @@ class OpenApiController
         $number = fn (): array => ['type' => 'number', 'format' => 'double', 'minimum' => 0];
 
         return [
+            'ApiSuccessResponse' => [
+                'type' => 'object',
+                'required' => ['success', 'message', 'data'],
+                'properties' => [
+                    'success' => ['type' => 'boolean', 'example' => true],
+                    'message' => ['type' => 'string', 'example' => 'Request completed successfully.'],
+                    'data' => ['type' => 'object', 'additionalProperties' => true],
+                ],
+            ],
+            'ApiNullSuccessResponse' => [
+                'type' => 'object',
+                'required' => ['success', 'message', 'data'],
+                'properties' => [
+                    'success' => ['type' => 'boolean', 'example' => true],
+                    'message' => ['type' => 'string', 'example' => 'Resource deleted successfully.'],
+                    'data' => ['type' => 'null', 'example' => null],
+                ],
+            ],
+            'ApiErrorResponse' => [
+                'type' => 'object',
+                'required' => ['success', 'message', 'errors'],
+                'properties' => [
+                    'success' => ['type' => 'boolean', 'example' => false],
+                    'message' => ['type' => 'string', 'example' => 'The given data was invalid.'],
+                    'errors' => ['type' => 'object', 'additionalProperties' => ['type' => 'array', 'items' => ['type' => 'string']]],
+                ],
+            ],
+            'AuthResponse' => [
+                'allOf' => [
+                    ['$ref' => '#/components/schemas/ApiSuccessResponse'],
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'data' => [
+                                'type' => 'object',
+                                'required' => ['user', 'token', 'token_type'],
+                                'properties' => [
+                                    'user' => ['$ref' => '#/components/schemas/User'],
+                                    'token' => ['type' => 'string', 'example' => '1|sanctum-token'],
+                                    'token_type' => ['type' => 'string', 'example' => 'Bearer'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'User' => [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'integer', 'example' => 1],
+                    'name' => ['type' => 'string', 'example' => 'Ahmad Ali'],
+                    'phone' => ['type' => 'string', 'example' => '+60123456789'],
+                    'email' => ['type' => 'string', 'format' => 'email', 'nullable' => true, 'example' => 'ahmad@example.com'],
+                    'user_type' => ['type' => 'string', 'enum' => ['admin', 'student', 'sponsor']],
+                    'status' => ['type' => 'string', 'enum' => ['active', 'inactive', 'suspended']],
+                    'phone_verified_at' => ['type' => 'string', 'format' => 'date-time', 'nullable' => true],
+                    'last_login_at' => ['type' => 'string', 'format' => 'date-time', 'nullable' => true],
+                ],
+            ],
+            'PaginatedResponse' => [
+                'allOf' => [
+                    ['$ref' => '#/components/schemas/ApiSuccessResponse'],
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'data' => [
+                                'type' => 'object',
+                                'required' => ['pagination'],
+                                'properties' => [
+                                    'pagination' => ['$ref' => '#/components/schemas/Pagination'],
+                                ],
+                                'additionalProperties' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'Pagination' => [
+                'type' => 'object',
+                'required' => ['current_page', 'per_page', 'total', 'last_page'],
+                'properties' => [
+                    'current_page' => ['type' => 'integer', 'example' => 1],
+                    'per_page' => ['type' => 'integer', 'example' => 20],
+                    'total' => ['type' => 'integer', 'example' => 42],
+                    'last_page' => ['type' => 'integer', 'example' => 3],
+                ],
+            ],
+            'HealthResponse' => [
+                'allOf' => [
+                    ['$ref' => '#/components/schemas/ApiSuccessResponse'],
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'data' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'status' => ['type' => 'string', 'example' => 'ok'],
+                                    'timestamp' => ['type' => 'string', 'format' => 'date-time'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             'EmptyRequest' => ['type' => 'object', 'additionalProperties' => false],
             'LoginRequest' => ['type' => 'object', 'required' => ['phone', 'password', 'device_name'], 'properties' => ['phone' => $string('+60123456789'), 'password' => ['type' => 'string', 'format' => 'password'], 'device_name' => $string('Mobile device name')]],
+            'RegisterRequest' => ['type' => 'object', 'required' => ['name', 'phone', 'password', 'password_confirmation'], 'properties' => ['name' => $string(), 'phone' => $string('+60123456789'), 'email' => ['type' => 'string', 'format' => 'email'], 'password' => ['type' => 'string', 'format' => 'password', 'minLength' => 8], 'password_confirmation' => ['type' => 'string', 'format' => 'password'], 'device_name' => $string('Mobile device name')]],
             'ChangePasswordRequest' => ['type' => 'object', 'required' => ['current_password', 'password', 'password_confirmation'], 'properties' => ['current_password' => ['type' => 'string', 'format' => 'password'], 'password' => ['type' => 'string', 'format' => 'password', 'minLength' => 8], 'password_confirmation' => ['type' => 'string', 'format' => 'password']]],
             'SetPasswordRequest' => ['type' => 'object', 'required' => ['password', 'password_confirmation'], 'properties' => ['password' => ['type' => 'string', 'format' => 'password', 'minLength' => 8], 'password_confirmation' => ['type' => 'string', 'format' => 'password']]],
             'StorePaymentRequest' => ['type' => 'object', 'required' => ['payment_method'], 'properties' => ['additional_infaq' => $number(), 'payment_method' => ['type' => 'string', 'enum' => ['qr', 'merchant', 'bank_transfer', 'manual']]]],
@@ -238,19 +344,95 @@ class OpenApiController
      */
     private function responses(LaravelRoute $route): array
     {
+        $successStatus = $this->successStatus($route);
         $responses = [
-            '200' => ['description' => 'Successful response'],
-            '401' => ['description' => 'Unauthenticated'],
-            '403' => ['description' => 'Forbidden'],
-            '404' => ['description' => 'Resource not found'],
-            '422' => ['description' => 'Validation or business rule error'],
+            (string) $successStatus => [
+                'description' => $this->successDescription($route, $successStatus),
+                ...($successStatus !== 204 ? ['content' => ['application/json' => ['schema' => $this->successSchema($route)]]] : []),
+            ],
+            '401' => $this->errorResponse('Unauthenticated'),
+            '403' => $this->errorResponse('Forbidden'),
+            '404' => $this->errorResponse('Resource not found'),
+            '422' => $this->errorResponse('Validation or business rule error'),
         ];
 
-        if (in_array('POST', $route->methods(), true)) {
-            $responses['201'] = ['description' => 'Resource created'];
+        if (in_array('POST', $route->methods(), true) && $successStatus !== 201) {
+            $responses['201'] = [
+                'description' => 'Resource created',
+                'content' => ['application/json' => ['schema' => $this->successSchema($route)]],
+            ];
         }
 
         return $responses;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function errorResponse(string $description): array
+    {
+        return [
+            'description' => $description,
+            'content' => ['application/json' => ['schema' => ['$ref' => '#/components/schemas/ApiErrorResponse']]],
+        ];
+    }
+
+    private function successStatus(LaravelRoute $route): int
+    {
+        $name = (string) $route->getName();
+
+        if ($name === 'v1.auth.register' || str_ends_with($name, '.store')) {
+            return 201;
+        }
+
+        if ($name === 'v1.payment-schedules.destroy') {
+            return 204;
+        }
+
+        return 200;
+    }
+
+    private function successDescription(LaravelRoute $route, int $status): string
+    {
+        if ($status === 204) {
+            return 'No content';
+        }
+
+        if ($status === 201) {
+            return 'Resource created';
+        }
+
+        return 'Successful response';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function successSchema(LaravelRoute $route): array
+    {
+        $name = (string) $route->getName();
+
+        if ($name === 'v1.auth.login' || $name === 'v1.auth.register') {
+            return ['$ref' => '#/components/schemas/AuthResponse'];
+        }
+
+        if ($name === 'v1.auth.me') {
+            return ['$ref' => '#/components/schemas/ApiSuccessResponse'];
+        }
+
+        if ($name === 'v1.health') {
+            return ['$ref' => '#/components/schemas/HealthResponse'];
+        }
+
+        if (str_contains($name, '.index') || str_ends_with($name, '.logs.index')) {
+            return ['$ref' => '#/components/schemas/PaginatedResponse'];
+        }
+
+        if (str_ends_with($name, '.destroy') || str_ends_with($name, '.logout') || str_ends_with($name, '.read-all')) {
+            return ['$ref' => '#/components/schemas/ApiNullSuccessResponse'];
+        }
+
+        return ['$ref' => '#/components/schemas/ApiSuccessResponse'];
     }
 
     /**
