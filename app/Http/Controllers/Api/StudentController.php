@@ -27,7 +27,7 @@ class StudentController extends Controller
 
         $students = User::query()
             ->where('user_type', 'student')
-            ->whereHas('classParticipants.classModel', fn ($query) => $query->whereIn('organization_id', $organizationIds))
+            // ->whereHas('classParticipants.classModel', fn ($query) => $query->whereIn('organization_id', $organizationIds))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->toString();
