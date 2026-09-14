@@ -61,7 +61,7 @@ class OpenApiController
                 'description' => 'ClassPay versioned REST API documentation generated from the registered Laravel routes.',
                 'version' => '1.0.0',
             ],
-            'servers' => [['url' => $request->getSchemeAndHttpHost()]],
+            'servers' => [['url' => rtrim($request->getSchemeAndHttpHost(), '/').'/api/v1']],
             'tags' => $this->tags($paths),
             'paths' => $paths,
             'components' => [

@@ -24,6 +24,7 @@ class SwaggerDocumentationTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('openapi', '3.0.3')
+            ->assertJsonPath('servers.0.url', 'http://localhost:8000/api/v1')
             ->assertJsonPath('components.securitySchemes.sanctumBearer.type', 'http')
             ->assertJsonPath('paths./auth/login.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/LoginRequest')
             ->assertJsonPath('paths./payment-schedules/{paymentSchedule}/payments.post.requestBody.content.application/json.schema.$ref', '#/components/schemas/StorePaymentRequest')
