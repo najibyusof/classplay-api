@@ -151,6 +151,7 @@ class OpenApiController
             str_contains($name, 'payment-setting.qr-code') => ['$ref' => '#/components/schemas/QrCodeUploadRequest'],
             str_contains($name, 'devices.store') || str_contains($name, 'user-devices.store') => ['$ref' => '#/components/schemas/StoreDeviceRequest'],
             str_contains($name, 'classes.store') => ['$ref' => '#/components/schemas/StoreClassRequest'],
+            str_contains($name, 'classes.update') => ['$ref' => '#/components/schemas/UpdateClassRequest'],
             str_contains($name, 'payment-setting.store') => ['$ref' => '#/components/schemas/StorePaymentSettingRequest'],
             str_contains($name, 'payment-schedules.store') => ['$ref' => '#/components/schemas/StorePaymentScheduleRequest'],
             str_contains($name, 'participants.store') => ['$ref' => '#/components/schemas/StoreParticipantRequest'],
@@ -339,6 +340,32 @@ class OpenApiController
                     ],
                 ],
             ],
+            'ClassResponse' => [
+                'allOf' => [
+                    ['$ref' => '#/components/schemas/ApiSuccessResponse'],
+                    [
+                        'type' => 'object',
+                        'properties' => [
+                            'data' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'id' => ['type' => 'integer', 'example' => 10],
+                                    'organization_id' => ['type' => 'integer', 'example' => 1],
+                                    'name' => ['type' => 'string', 'example' => 'Form 5 Physics'],
+                                    'description' => ['type' => 'string', 'nullable' => true],
+                                    'teacher_name' => ['type' => 'string', 'nullable' => true],
+                                    'status' => ['type' => 'string', 'enum' => ['draft', 'active', 'inactive', 'completed']],
+                                    'start_date' => ['type' => 'string', 'format' => 'date', 'nullable' => true],
+                                    'end_date' => ['type' => 'string', 'format' => 'date', 'nullable' => true],
+                                    'created_by' => ['type' => 'integer', 'nullable' => true],
+                                    'created_at' => ['type' => 'string', 'format' => 'date-time', 'nullable' => true],
+                                    'updated_at' => ['type' => 'string', 'format' => 'date-time', 'nullable' => true],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             'EmptyRequest' => ['type' => 'object', 'additionalProperties' => false],
             'LoginRequest' => ['type' => 'object', 'required' => ['phone', 'password', 'device_name'], 'properties' => ['phone' => $string('+60123456789'), 'password' => ['type' => 'string', 'format' => 'password'], 'device_name' => $string('Mobile device name')]],
             'RegisterRequest' => ['type' => 'object', 'required' => ['name', 'phone', 'password', 'password_confirmation'], 'properties' => ['name' => $string(), 'phone' => $string('+60123456789'), 'email' => ['type' => 'string', 'format' => 'email'], 'password' => ['type' => 'string', 'format' => 'password', 'minLength' => 8], 'password_confirmation' => ['type' => 'string', 'format' => 'password'], 'device_name' => $string('Mobile device name')]],
@@ -351,6 +378,7 @@ class OpenApiController
             'StoreDeviceRequest' => ['type' => 'object', 'required' => ['device_token', 'platform'], 'properties' => ['device_token' => $string(), 'platform' => ['type' => 'string', 'enum' => ['android', 'ios']], 'device_name' => $string(), 'app_version' => $string()]],
             'StoreOrganizationRequest' => ['type' => 'object', 'required' => ['name'], 'properties' => ['name' => $string(), 'code' => $string(), 'description' => $string(), 'logo_path' => $string(), 'status' => ['type' => 'string', 'enum' => ['active', 'inactive']]]],
             'StoreClassRequest' => ['type' => 'object', 'required' => ['name'], 'properties' => ['name' => $string(), 'description' => $string(), 'teacher_name' => $string(), 'status' => ['type' => 'string', 'enum' => ['draft', 'active', 'inactive', 'completed']], 'start_date' => ['type' => 'string', 'format' => 'date'], 'end_date' => ['type' => 'string', 'format' => 'date']]],
+            'UpdateClassRequest' => ['type' => 'object', 'properties' => ['name' => $string(), 'description' => $string(), 'teacher_name' => $string(), 'status' => ['type' => 'string', 'enum' => ['draft', 'active', 'inactive', 'completed']], 'start_date' => ['type' => 'string', 'format' => 'date'], 'end_date' => ['type' => 'string', 'format' => 'date']]],
             'StorePaymentSettingRequest' => ['type' => 'object', 'required' => ['required_amount', 'payment_frequency'], 'properties' => ['required_amount' => $number(), 'currency' => ['type' => 'string', 'minLength' => 3, 'maxLength' => 3, 'example' => 'MYR'], 'payment_frequency' => ['type' => 'string', 'enum' => ['weekly', 'fortnightly', 'monthly']], 'bank_name' => $string(), 'bank_account_name' => $string(), 'bank_account_number' => $string(), 'allow_additional_infaq' => ['type' => 'boolean'], 'minimum_infaq' => $number(), 'maximum_infaq' => $number(), 'reminder_enabled' => ['type' => 'boolean'], 'reminder_days_before' => ['type' => 'integer', 'minimum' => 0], 'reminder_days_after' => ['type' => 'integer', 'minimum' => 0]]],
             'StorePaymentScheduleRequest' => ['type' => 'object', 'required' => ['class_participant_id', 'period_start', 'period_end', 'due_date', 'required_amount'], 'properties' => ['class_participant_id' => ['type' => 'integer'], 'period_start' => ['type' => 'string', 'format' => 'date'], 'period_end' => ['type' => 'string', 'format' => 'date'], 'due_date' => ['type' => 'string', 'format' => 'date'], 'required_amount' => $number(), 'status' => ['type' => 'string', 'enum' => ['upcoming', 'pending', 'partially_paid', 'paid', 'overdue', 'cancelled']]]],
             'StoreParticipantRequest' => ['type' => 'object', 'required' => ['user_id', 'participant_type'], 'properties' => ['user_id' => ['type' => 'integer'], 'participant_type' => ['type' => 'string', 'enum' => ['student', 'sponsor']]]],
@@ -442,6 +470,10 @@ class OpenApiController
 
         if (str_ends_with($name, '.destroy') || str_ends_with($name, '.logout') || str_ends_with($name, '.read-all') || str_ends_with($name, '.forgot-password') || str_ends_with($name, '.reset-password')) {
             return ['$ref' => '#/components/schemas/ApiNullSuccessResponse'];
+        }
+
+        if (in_array($name, ['v1.organizations.classes.show', 'v1.organizations.classes.update', 'v1.organizations.classes.activate'], true)) {
+            return ['$ref' => '#/components/schemas/ClassResponse'];
         }
 
         return ['$ref' => '#/components/schemas/ApiSuccessResponse'];

@@ -38,6 +38,10 @@ class SwaggerDocumentationTest extends TestCase
             ->assertJsonPath('paths./payments/{payment}/proofs.post.requestBody.content.multipart/form-data.schema.$ref', '#/components/schemas/PaymentProofUploadRequest')
             ->assertJsonPath('paths./admin/dashboard.get.responses.200.content.application/json.schema.$ref', '#/components/schemas/ApiSuccessResponse')
             ->assertJsonPath('paths./admin/payments.get.responses.200.content.application/json.schema.$ref', '#/components/schemas/PaginatedResponse')
+            ->assertJsonPath('paths./organizations/{organization}/classes/{class}.get.responses.200.content.application/json.schema.$ref', '#/components/schemas/ClassResponse')
+            ->assertJsonPath('paths./organizations/{organization}/classes/{class}.patch.requestBody.content.application/json.schema.$ref', '#/components/schemas/UpdateClassRequest')
+            ->assertJsonPath('paths./organizations/{organization}/classes/{class}.patch.responses.200.content.application/json.schema.$ref', '#/components/schemas/ClassResponse')
+            ->assertJsonPath('paths./organizations/{organization}/classes/{class}/activate.post.responses.200.content.application/json.schema.$ref', '#/components/schemas/ClassResponse')
             ->assertJsonStructure([
                 'servers',
                 'info',
@@ -49,7 +53,9 @@ class SwaggerDocumentationTest extends TestCase
         $this->assertArrayHasKey('/auth/login', $response->json('paths'));
         $this->assertArrayHasKey('/auth/register/{userType}', $response->json('paths'));
         $this->assertArrayHasKey('/admin/dashboard', $response->json('paths'));
+        $this->assertArrayHasKey('/organizations/{organization}/classes/{class}', $response->json('paths'));
         $this->assertArrayHasKey('LoginRequest', $response->json('components.schemas'));
+        $this->assertArrayHasKey('ClassResponse', $response->json('components.schemas'));
         $this->assertArrayHasKey('AuthResponse', $response->json('components.schemas'));
         $this->assertArrayHasKey('ResetPasswordRequest', $response->json('components.schemas'));
         $this->assertArrayHasKey('ApiErrorResponse', $response->json('components.schemas'));
