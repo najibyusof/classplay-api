@@ -19,6 +19,19 @@ All endpoints require `Authorization: Bearer {token}` (`auth:sanctum`).
 | `DELETE`     | `/api/v1/classes/{class}`                      | `class.delete` & Org Admin           | Delete a class                                                   |
 | `POST`       | `/api/v1/admin/classes/{class}/activate`       | `class.update` & Org Admin           | Activate a draft class and atomically generate payment schedules |
 
+### Organization-scoped class URLs
+
+New clients should use the organization-scoped equivalents below. The legacy `/classes/{class}` and `/admin/classes/{class}` routes remain available for backward compatibility.
+
+| Method       | Canonical endpoint                                              | Description                                  |
+| ------------ | --------------------------------------------------------------- | -------------------------------------------- |
+| `GET`        | `/api/v1/organizations/{organization}/classes/{class}`          | View a class belonging to the organization   |
+| `PUT\|PATCH` | `/api/v1/organizations/{organization}/classes/{class}`          | Update a class belonging to the organization |
+| `DELETE`     | `/api/v1/organizations/{organization}/classes/{class}`          | Delete a class belonging to the organization |
+| `POST`       | `/api/v1/organizations/{organization}/classes/{class}/activate` | Activate the class and generate schedules    |
+
+These class detail, update, delete, and activation routes use scoped model binding. If the class does not belong to `{organization}`, the API returns `404` and does not execute the controller action. Child resources retain their existing paths for backward compatibility and remain authorized through the class relationship and policies.
+
 ### Create Class Example (`POST /api/v1/organizations/1/classes`)
 
 ```json

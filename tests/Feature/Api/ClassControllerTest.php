@@ -74,4 +74,31 @@ class ClassControllerTest extends TestCase
             ->getJson("/api/v1/classes/{$class->id}")
             ->assertForbidden();
     }
+
+    public function test_organization_scoped_class_endpoint_rejects_a_class_from_another_organization(): void
+    {
+        $organizationA = Organization::factory()->create();
+        $organizationB = Organization::factory()->create();
+        $admin = $this->organizationAdmin($organizationA);
+        $classB = ClassModel::factory()->create(['organization_id' => $organizationB->id]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/v1/organizations/{$organizationA->id}/classes/{$classB->id}")
+            ->assertNotFound();
+    }
+
+    public function test_organization_admin_can_update_a_class_through_the_organization_scoped_endpoint(): void
+    {
+        $organization = Organization::factory()->create();
+        $admin = $this->organizationAdmin($organization);
+        $class = ClassModel::factory()->create(['organization_id' => $organization->id]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->patchJson("/api/v1/organizations/{$organization->id}/classes/{$class->id}", [
+                'name' => 'Updated Class',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.name', 'Updated Class')
+            ->assertJsonPath('data.organization_id', $organization->id);
+    }
 }

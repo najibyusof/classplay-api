@@ -102,6 +102,14 @@ Route::prefix('v1')->name('v1.')->group(function () {
 
         Route::get('organizations/{organization}/classes', [ClassController::class, 'index'])->name('organizations.classes.index');
         Route::post('organizations/{organization}/classes', [ClassController::class, 'store'])->name('organizations.classes.store');
+
+        Route::scopeBindings()->group(function () {
+            Route::get('organizations/{organization}/classes/{class}', [ClassController::class, 'showScoped'])->name('organizations.classes.show');
+            Route::match(['put', 'patch'], 'organizations/{organization}/classes/{class}', [ClassController::class, 'updateScoped'])->name('organizations.classes.update');
+            Route::delete('organizations/{organization}/classes/{class}', [ClassController::class, 'destroyScoped'])->name('organizations.classes.destroy');
+            Route::post('organizations/{organization}/classes/{class}/activate', [ClassController::class, 'activateScoped'])->name('organizations.classes.activate');
+        });
+
         Route::get('classes/{class}', [ClassController::class, 'show'])->name('classes.show');
         Route::match(['put', 'patch'], 'classes/{class}', [ClassController::class, 'update'])->name('classes.update');
         Route::delete('classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');

@@ -95,25 +95,29 @@ A client must not send `user_type`, `payer_id`, or ownership fields to create or
 
 ### Classes, Sessions, and Payment Settings
 
-| Method   | Path                                       | Body or query                                                           |
-| -------- | ------------------------------------------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
-| `GET`    | `/organizations/{organization}/classes`    | Query supported by class listing                                        |
-| `POST`   | `/organizations/{organization}/classes`    | `name`, `description`, `teacher_name`, `start_date`, `end_date`         |
-| `GET`    | `/classes/{class}`                         | None                                                                    |
-| `PUT     | PATCH`                                     | `/classes/{class}`                                                      | Class fields; all update fields optional           |
-| `DELETE` | `/classes/{class}`                         | None                                                                    |
-| `POST`   | `/admin/classes/{class}/activate`          | None; activates and generates schedules                                 |
-| `GET`    | `/classes/{class}/schedules`               | None                                                                    |
-| `POST`   | `/classes/{class}/schedules`               | Schedule day/time fields; see [classes.md](classes.md)                  |
-| `PUT     | PATCH`                                     | `/class-schedules/{classSchedule}`                                      | Schedule day/time fields                           |
-| `DELETE` | `/class-schedules/{classSchedule}`         | None                                                                    |
-| `GET`    | `/classes/{class}/payment-setting`         | None                                                                    |
-| `POST`   | `/classes/{class}/payment-setting`         | Amount, currency, frequency, bank, infaq, and reminder settings         |
-| `PUT     | PATCH`                                     | `/classes/{class}/payment-setting`                                      | Payment-setting fields; all update fields optional |
-| `DELETE` | `/classes/{class}/payment-setting`         | None                                                                    |
-| `POST`   | `/classes/{class}/payment-setting/qr-code` | Multipart field `file`; image `jpg`, `jpeg`, `png`, or `webp`, max 5 MB |
+Use the organization-scoped class detail routes for new mobile clients. The legacy class-only routes remain available for backward compatibility.
+
+| Method       | Path                                                     | Body or query                                                           |
+| ------------ | -------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `GET`        | `/organizations/{organization}/classes`                  | Query supported by class listing                                        |
+| `POST`       | `/organizations/{organization}/classes`                  | `name`, `description`, `teacher_name`, `start_date`, `end_date`         |
+| `GET`        | `/organizations/{organization}/classes/{class}`          | None                                                                    |
+| `PUT\|PATCH` | `/organizations/{organization}/classes/{class}`          | Class fields; all update fields optional                                |
+| `DELETE`     | `/organizations/{organization}/classes/{class}`          | None                                                                    |
+| `POST`       | `/organizations/{organization}/classes/{class}/activate` | None; activates and generates schedules                                 |
+| `GET`        | `/classes/{class}/schedules`                             | None                                                                    |
+| `POST`       | `/classes/{class}/schedules`                             | Schedule day/time fields; see [classes.md](classes.md)                  |
+| `PUT         | PATCH`                                                   | `/class-schedules/{classSchedule}`                                      | Schedule day/time fields                           |
+| `DELETE`     | `/class-schedules/{classSchedule}`                       | None                                                                    |
+| `GET`        | `/classes/{class}/payment-setting`                       | None                                                                    |
+| `POST`       | `/classes/{class}/payment-setting`                       | Amount, currency, frequency, bank, infaq, and reminder settings         |
+| `PUT         | PATCH`                                                   | `/classes/{class}/payment-setting`                                      | Payment-setting fields; all update fields optional |
+| `DELETE`     | `/classes/{class}/payment-setting`                       | None                                                                    |
+| `POST`       | `/classes/{class}/payment-setting/qr-code`               | Multipart field `file`; image `jpg`, `jpeg`, `png`, or `webp`, max 5 MB |
 
 Class activation is an atomic operation. The class must be ready for activation and its active participants receive generated payment schedules. See [classes.md](classes.md).
+
+The nested class routes use scoped model binding. If `{class}` does not belong to `{organization}`, the API returns `404`.
 
 ### Payment Schedules, Payments, Proofs, and Transactions
 

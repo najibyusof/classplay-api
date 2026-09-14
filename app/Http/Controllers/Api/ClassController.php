@@ -64,6 +64,11 @@ class ClassController extends Controller
         );
     }
 
+    public function showScoped(Organization $organization, ClassModel $class): JsonResponse
+    {
+        return $this->show($class);
+    }
+
     public function update(UpdateClassRequest $request, ClassModel $class): JsonResponse
     {
         $this->authorize('update', $class);
@@ -76,6 +81,11 @@ class ClassController extends Controller
         );
     }
 
+    public function updateScoped(UpdateClassRequest $request, Organization $organization, ClassModel $class): JsonResponse
+    {
+        return $this->update($request, $class);
+    }
+
     public function destroy(ClassModel $class): JsonResponse
     {
         $this->authorize('delete', $class);
@@ -83,6 +93,11 @@ class ClassController extends Controller
         $class->delete();
 
         return $this->successResponse(null, 'Class deleted successfully.');
+    }
+
+    public function destroyScoped(Organization $organization, ClassModel $class): JsonResponse
+    {
+        return $this->destroy($class);
     }
 
     /**
@@ -104,5 +119,10 @@ class ClassController extends Controller
             new ClassResource($class),
             'Class activated and payment schedules generated successfully.'
         );
+    }
+
+    public function activateScoped(Organization $organization, ClassModel $class): JsonResponse
+    {
+        return $this->activate($class);
     }
 }
