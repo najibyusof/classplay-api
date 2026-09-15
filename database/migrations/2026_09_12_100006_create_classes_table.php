@@ -13,7 +13,11 @@ return new class extends Migration
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->string('name', 150);
             $table->text('description')->nullable();
-            $table->string('teacher_name', 150)->nullable();
+            $table->string('teacher_name', 150);
+            $table->unsignedTinyInteger('day_of_week');
+            $table->time('start_time');
+            $table->enum('frequency', ['weekly', 'fortnightly', 'monthly'])->default('weekly');
+            $table->decimal('payment_amount', 12, 2);
             $table->enum('status', ['draft', 'active', 'inactive', 'completed'])->default('draft');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

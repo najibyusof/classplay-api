@@ -20,6 +20,10 @@ class ClassModel extends Model
         'name',
         'description',
         'teacher_name',
+        'day_of_week',
+        'start_time',
+        'frequency',
+        'payment_amount',
         'status',
         'start_date',
         'end_date',
@@ -29,6 +33,7 @@ class ClassModel extends Model
     protected function casts(): array
     {
         return [
+            'payment_amount' => 'decimal:2',
             'start_date' => 'date',
             'end_date' => 'date',
         ];

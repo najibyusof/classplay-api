@@ -57,7 +57,14 @@ class ClassControllerTest extends TestCase
             ->assertJsonPath('data.schedules.0.day_of_week', 1)
             ->assertJsonPath('data.payment_setting.required_amount', '50.00');
 
-        $this->assertDatabaseHas('classes', ['name' => 'Quran Class', 'organization_id' => $organization->id]);
+        $this->assertDatabaseHas('classes', [
+            'name' => 'Quran Class',
+            'organization_id' => $organization->id,
+            'teacher_name' => 'Cikgu Ahmad',
+            'day_of_week' => 1,
+            'frequency' => 'weekly',
+            'payment_amount' => 50.00,
+        ]);
 
         $class = ClassModel::query()->where('name', 'Quran Class')->firstOrFail();
         $this->assertDatabaseHas('class_schedules', [

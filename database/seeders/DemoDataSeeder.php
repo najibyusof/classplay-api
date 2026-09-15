@@ -6,7 +6,6 @@ use App\Models\AuditLog;
 use App\Models\ClassModel;
 use App\Models\ClassParticipant;
 use App\Models\ClassPaymentSetting;
-use App\Models\ClassSchedule;
 use App\Models\Notification;
 use App\Models\NotificationLog;
 use App\Models\NotificationTemplate;
@@ -217,7 +216,6 @@ class DemoDataSeeder extends Seeder
         };
         $class->forceFill(['status' => $status])->save();
 
-        $this->seedSchedules($class, $index);
         $this->seedPaymentSetting($class, $index);
 
         $participants = $this->seedParticipants($class, $students, $sponsors, $isMain);
@@ -227,47 +225,13 @@ class DemoDataSeeder extends Seeder
         }
     }
 
-    private function seedSchedules(ClassModel $class, int $index): void
-    {
-        // Primary schedule: rotate through days and all recurrence types.
-        ClassSchedule::factory()->create([
-            'class_id' => $class->id,
-            'day_of_week' => $index % 7,
-            'recurrence_type' => ['weekly', 'fortnightly', 'monthly'][$index % 3],
-            'effective_from' => now()->subMonths(2)->toDateString(),
-            'effective_until' => null,
-        ]);
-
-        // Every fourth class has a second weekly session on another day.
-        if ($index % 4 === 0) {
-            ClassSchedule::factory()->create([
-                'class_id' => $class->id,
-                'day_of_week' => ($index + 3) % 7,
-                'recurrence_type' => 'weekly',
-                'start_time' => '20:00',
-                'effective_from' => now()->subMonths(2)->toDateString(),
-            ]);
-        }
-
-        // An ended schedule (superseded by the current one).
-        if ($index % 5 === 0) {
-            ClassSchedule::factory()->create([
-                'class_id' => $class->id,
-                'day_of_week' => ($index + 1) % 7,
-                'recurrence_type' => 'weekly',
-                'effective_from' => now()->subMonths(6)->toDateString(),
-                'effective_until' => now()->subMonths(2)->toDateString(),
-            ]);
-        }
-    }
-
     private function seedPaymentSetting(ClassModel $class, int $index): void
     {
-        $frequency = ['weekly', 'fortnightly', 'monthly'][$index % 3];
+        $frequency = $class->frequency ?? ['weekly', 'fortnightly', 'monthly'][$index % 3];
 
         ClassPaymentSetting::factory()->create([
             'class_id' => $class->id,
-            'required_amount' => fake()->randomElement([30, 50, 80, 100, 150]),
+            'required_amount' => $class->payment_amount ?? fake()->randomElement([30, 50, 80, 100, 150]),
             'payment_frequency' => $frequency,
             // Rotate payment-channel configurations: bank only, QR only,
             // merchant URL only, all channels, none (cash only).
