@@ -8,6 +8,7 @@ use App\Http\Requests\Organization\StoreOrganizationRequest;
 use App\Http\Requests\Organization\UpdateOrganizationRequest;
 use App\Http\Resources\OrganizationResource;
 use App\Models\Organization;
+use App\Models\SponsorStudent;
 use App\Services\Organization\OrganizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,6 +34,42 @@ class OrganizationController extends Controller
                 $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%"));
             })
             ->latest()
+            ->paginate($perPage);
+
+        return $this->successResponse([
+            'organizations' => OrganizationResource::collection($organizations)->resolve(),
+            'pagination' => [
+                'current_page' => $organizations->currentPage(),
+                'per_page' => $organizations->perPage(),
+                'total' => $organizations->total(),
+                'last_page' => $organizations->lastPage(),
+            ],
+        ], 'Organizations retrieved successfully.');
+    }
+
+    /**
+     * List the organizations the authenticated user participates in (as a
+     * student, or including organizations of students they sponsor), derived
+     * from active class participations.
+     */
+    public function myOrganizations(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $sponsoredStudentIds = SponsorStudent::query()
+            ->where('sponsor_id', $user->id)
+            ->where('status', 'active')
+            ->pluck('student_id');
+
+        $visibleUserIds = [$user->id, ...$sponsoredStudentIds->all()];
+
+        $perPage = max(1, min((int) $request->integer('per_page', 20), 100));
+
+        $organizations = Organization::query()
+            ->whereHas('classes.participants', fn ($query) => $query
+                ->whereIn('user_id', $visibleUserIds)
+                ->where('status', 'active'))
+            ->orderBy('name')
             ->paginate($perPage);
 
         return $this->successResponse([

@@ -6,6 +6,7 @@ use App\Models\ClassModel;
 use App\Models\ClassParticipant;
 use App\Models\Organization;
 use App\Models\OrganizationAdmin;
+use App\Models\SponsorStudent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -122,6 +123,106 @@ class ClassControllerTest extends TestCase
         $this->actingAs($student, 'sanctum')
             ->getJson("/api/v1/classes/{$class->id}")
             ->assertForbidden();
+    }
+
+    public function test_student_can_list_their_own_classes(): void
+    {
+        $organization = Organization::factory()->create();
+        $enrolledClass = ClassModel::factory()->create(['organization_id' => $organization->id, 'name' => 'Kelas Quran']);
+        $otherClass = ClassModel::factory()->create(['organization_id' => $organization->id, 'name' => 'Kelas Iqra']);
+        $student = User::factory()->create(['user_type' => 'student']);
+
+        ClassParticipant::factory()->create([
+            'class_id' => $enrolledClass->id,
+            'user_id' => $student->id,
+            'status' => 'active',
+        ]);
+        ClassParticipant::factory()->create([
+            'class_id' => $otherClass->id,
+            'user_id' => $student->id,
+            'status' => 'removed',
+        ]);
+
+        $response = $this->actingAs($student, 'sanctum')
+            ->getJson('/api/v1/student/classes');
+
+        $response->assertOk()
+            ->assertJsonPath('data.pagination.total', 1)
+            ->assertJsonPath('data.classes.0.name', 'Kelas Quran');
+    }
+
+    public function test_sponsor_classes_include_sponsored_students_classes(): void
+    {
+        $organization = Organization::factory()->create();
+        $class = ClassModel::factory()->create(['organization_id' => $organization->id, 'name' => 'Kelas Tajwid']);
+        $sponsor = User::factory()->create(['user_type' => 'sponsor']);
+        $student = User::factory()->create(['user_type' => 'student']);
+
+        SponsorStudent::factory()->create([
+            'sponsor_id' => $sponsor->id,
+            'student_id' => $student->id,
+            'status' => 'active',
+        ]);
+        ClassParticipant::factory()->create([
+            'class_id' => $class->id,
+            'user_id' => $student->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($sponsor, 'sanctum')
+            ->getJson('/api/v1/sponsor/classes')
+            ->assertOk()
+            ->assertJsonPath('data.classes.0.name', 'Kelas Tajwid');
+    }
+
+    public function test_student_can_list_their_organizations(): void
+    {
+        $enrolledOrg = Organization::factory()->create(['name' => 'Pusat Tahfiz Al-Amin']);
+        $otherOrg = Organization::factory()->create(['name' => 'Madrasah Nurul Iman']);
+        $class = ClassModel::factory()->create(['organization_id' => $enrolledOrg->id]);
+        $otherClass = ClassModel::factory()->create(['organization_id' => $otherOrg->id]);
+        $student = User::factory()->create(['user_type' => 'student']);
+
+        ClassParticipant::factory()->create([
+            'class_id' => $class->id,
+            'user_id' => $student->id,
+            'status' => 'active',
+        ]);
+        ClassParticipant::factory()->create([
+            'class_id' => $otherClass->id,
+            'user_id' => $student->id,
+            'status' => 'removed',
+        ]);
+
+        $this->actingAs($student, 'sanctum')
+            ->getJson('/api/v1/student/organizations')
+            ->assertOk()
+            ->assertJsonPath('data.pagination.total', 1)
+            ->assertJsonPath('data.organizations.0.name', 'Pusat Tahfiz Al-Amin');
+    }
+
+    public function test_sponsor_organizations_include_sponsored_students_organizations(): void
+    {
+        $organization = Organization::factory()->create(['name' => 'Sekolah Agama Al-Falah']);
+        $class = ClassModel::factory()->create(['organization_id' => $organization->id]);
+        $sponsor = User::factory()->create(['user_type' => 'sponsor']);
+        $student = User::factory()->create(['user_type' => 'student']);
+
+        SponsorStudent::factory()->create([
+            'sponsor_id' => $sponsor->id,
+            'student_id' => $student->id,
+            'status' => 'active',
+        ]);
+        ClassParticipant::factory()->create([
+            'class_id' => $class->id,
+            'user_id' => $student->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($sponsor, 'sanctum')
+            ->getJson('/api/v1/sponsor/organizations')
+            ->assertOk()
+            ->assertJsonPath('data.organizations.0.name', 'Sekolah Agama Al-Falah');
     }
 
     public function test_organization_scoped_class_endpoint_rejects_a_class_from_another_organization(): void

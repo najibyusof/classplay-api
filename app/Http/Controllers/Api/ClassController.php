@@ -9,6 +9,7 @@ use App\Http\Requests\ClassManagement\UpdateClassRequest;
 use App\Http\Resources\ClassResource;
 use App\Models\ClassModel;
 use App\Models\Organization;
+use App\Models\SponsorStudent;
 use App\Services\Payment\PaymentScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -80,6 +81,42 @@ class ClassController extends Controller
             'Class created successfully.',
             201
         );
+    }
+
+    /**
+     * List the classes the authenticated user participates in (as a student,
+     * or including classes of students they sponsor).
+     */
+    public function myClasses(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $sponsoredStudentIds = SponsorStudent::query()
+            ->where('sponsor_id', $user->id)
+            ->where('status', 'active')
+            ->pluck('student_id');
+
+        $visibleUserIds = [$user->id, ...$sponsoredStudentIds->all()];
+
+        $perPage = max(1, min((int) $request->integer('per_page', 20), 100));
+
+        $classes = ClassModel::query()
+            ->whereHas('participants', fn ($query) => $query
+                ->whereIn('user_id', $visibleUserIds)
+                ->where('status', 'active'))
+            ->with(['organization', 'paymentSetting'])
+            ->orderBy('name')
+            ->paginate($perPage);
+
+        return $this->successResponse([
+            'classes' => ClassResource::collection($classes)->resolve(),
+            'pagination' => [
+                'current_page' => $classes->currentPage(),
+                'per_page' => $classes->perPage(),
+                'total' => $classes->total(),
+                'last_page' => $classes->lastPage(),
+            ],
+        ], 'Classes retrieved successfully.');
     }
 
     public function show(ClassModel $class): JsonResponse

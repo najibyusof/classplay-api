@@ -32,6 +32,19 @@ New clients should use the organization-scoped equivalents below. The legacy `/c
 
 These class detail, update, delete, and activation routes use scoped model binding. If the class does not belong to `{organization}`, the API returns `404` and does not execute the controller action. Child resources retain their existing paths for backward compatibility and remain authorized through the class relationship and policies.
 
+### Self-service class & organization listing
+
+Students and sponsors have their own endpoints, scoped to classes they actively participate in (for sponsors, also classes of students they actively sponsor via `sponsor_students`):
+
+| Method | Endpoint                        | Description                                        |
+| ------ | ------------------------------- | -------------------------------------------------- |
+| `GET`  | `/api/v1/student/classes`       | List classes the student actively participates in  |
+| `GET`  | `/api/v1/sponsor/classes`       | List own + sponsored students' classes             |
+| `GET`  | `/api/v1/student/organizations` | Organizations of the student's classes             |
+| `GET`  | `/api/v1/sponsor/organizations` | Organizations of own + sponsored students' classes |
+
+All four return the standard paginated envelope (`data.classes` / `data.organizations` + `data.pagination`) with `page`/`per_page` (max 100) query support. Removed or inactive participations are excluded.
+
 ### Create Class Example (`POST /api/v1/organizations/1/classes`)
 
 A single request creates the class, its first recurring schedule (Day / Time / Frequency), and its payment setting (Payment Amount) in one atomic database transaction.
@@ -136,6 +149,51 @@ Missing any of the required schedule/payment fields returns field-level errors:
 ```
 
 > **Note:** The class is created with status `draft` by default. Use the activate endpoint (section 4) to make it active and generate payment schedules for participants. Bank details, QR code, and infaq limits are configured separately via the payment-setting endpoints (section 3).
+
+### View Class (`GET /api/v1/classes/{class}` or `/api/v1/organizations/{organization}/classes/{class}`)
+
+Returns a single class. The schedule (`day_of_week`, `start_time`, `frequency`) and `payment_amount` are exposed as flat attributes on the class; the recurring `schedules` and `payment_setting` relationships are included when loaded.
+
+```json
+{
+    "success": true,
+    "message": "Class retrieved successfully.",
+    "data": {
+        "id": 1,
+        "organization_id": 1,
+        "name": "Quran Class",
+        "description": "Weekly Quran recitation class.",
+        "teacher_name": "Cikgu Ahmad",
+        "day_of_week": 1,
+        "start_time": "10:00:00",
+        "frequency": "monthly",
+        "payment_amount": "150.00",
+        "status": "active",
+        "start_date": "2026-09-01",
+        "end_date": null,
+        "created_by": 1,
+        "created_at": "2026-09-15T10:00:00.000000Z",
+        "updated_at": "2026-09-15T10:00:00.000000Z"
+    }
+}
+```
+
+### Update Class (`PUT|PATCH /api/v1/organizations/{organization}/classes/{class}`)
+
+All update fields are optional. Only these attributes are updatable through this endpoint; schedule (`day_of_week`, `start_time`, `recurrence_type`) and `payment_amount` are managed via the class-schedule and payment-setting endpoints (sections 2 and 3), not the class update route.
+
+#### Request Body
+
+| Field          | Type   | Required | Description                                |
+| -------------- | ------ | -------- | ------------------------------------------ |
+| `name`         | string | No       | Class name, max 150 chars                  |
+| `description`  | string | No       | Free-text description                      |
+| `teacher_name` | string | No       | Teacher name, max 150 chars                |
+| `status`       | string | No       | `draft`, `active`, `inactive`, `completed` |
+| `start_date`   | date   | No       | First day of the class                     |
+| `end_date`     | date   | No       | Last day; must be on/after `start_date`    |
+
+Returns the updated class using the same shape as the view response above.
 
 ---
 

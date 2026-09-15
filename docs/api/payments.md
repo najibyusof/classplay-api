@@ -16,6 +16,8 @@ Every endpoint requires `Authorization: Bearer {token}` (`auth:sanctum`) and exi
 
 | Method | Path                                                        | Purpose                                                  |
 | ------ | ----------------------------------------------------------- | -------------------------------------------------------- |
+| GET    | `/{student\|sponsor}/organizations`                         | Organizations of classes the user participates in        |
+| GET    | `/{student\|sponsor}/classes`                              | Classes the user actively participates in                |
 | GET    | `/{student\|sponsor}/payment-schedules`                     | List own (or sponsored students') payment schedules      |
 | GET    | `/{student\|sponsor}/payment-schedules/current`             | The single most relevant unpaid/pending/overdue schedule |
 | GET    | `/{student\|sponsor}/payment-schedules/{schedule}`          | View one schedule                                        |

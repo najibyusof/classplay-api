@@ -149,6 +149,8 @@ Route::prefix('v1')->name('v1.')->group(function () {
 
         foreach (['student', 'sponsor'] as $participantType) {
             Route::prefix($participantType)->name($participantType.'.')->group(function () {
+                Route::get('classes', [ClassController::class, 'myClasses'])->name('classes.index');
+                Route::get('organizations', [OrganizationController::class, 'myOrganizations'])->name('organizations.index');
                 Route::get('payment-schedules/current', [PaymentScheduleController::class, 'myCurrentPaymentSchedule'])->name('payment-schedules.current');
                 Route::get('payment-schedules', [PaymentScheduleController::class, 'myPaymentSchedules'])->name('payment-schedules.index');
                 Route::get('payment-schedules/{paymentSchedule}', [PaymentScheduleController::class, 'show'])->name('payment-schedules.show');

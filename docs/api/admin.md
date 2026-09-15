@@ -42,6 +42,8 @@ The following tables are the complete admin management surface. `PUT|PATCH` mean
 
 ### Dashboard and Reports
 
+Student and sponsor mobile clients also have self-service endpoints: `GET /{student\|sponsor}/classes` (their classes), `GET /{student\|sponsor}/organizations` (organizations of those classes), and the payment-schedule/payment endpoints — see [payments.md](payments.md).
+
 | Method | Path                                            | Purpose                                         | Query parameters                                                                                                                                                |
 | ------ | ----------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/admin/dashboard`                              | Aggregated metrics for accessible organizations | `from`/`date_from`, `to`/`date_to`, `recent_limit` (`1`-`50`, default `10`)                                                                                     |
