@@ -105,6 +105,17 @@ class DemoDataSeeder extends Seeder
             'code' => 'ORG-ALHUDA',
         ]);
 
+        // The seeded Demo Admin account administers the main organization so
+        // the demo login always has at least one accessible organization.
+        $demoAdmin = User::query()->where('email', 'admin@example.com')->first();
+        if ($demoAdmin instanceof User) {
+            OrganizationAdmin::factory()->create([
+                'organization_id' => $main->id,
+                'user_id' => $demoAdmin->id,
+                'status' => 'active',
+            ]);
+        }
+
         $others = Organization::factory(self::ORGANIZATION_COUNT - 2)->create();
         $inactive = Organization::factory()->create(['status' => 'inactive']);
 
