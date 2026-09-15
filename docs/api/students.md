@@ -2,6 +2,8 @@
 
 Base URL: `/api/v1/admin/students`. All endpoints require `Authorization: Bearer {token}` (`auth:sanctum`) and follow the ClassPay response envelope (`docs/api/authentication.md`).
 
+> **Student self-service:** a student can also list their own classes and organizations via `GET /api/v1/student/classes` and `GET /api/v1/student/organizations` — see [payments.md](payments.md) and [classes.md](classes.md).
+
 ## Concept
 
 Students are `users` with `user_type = student`. Class membership is never stored on the user — it lives in `class_participants`, so the same student can belong to multiple classes across multiple organizations:
