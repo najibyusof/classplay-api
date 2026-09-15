@@ -308,6 +308,112 @@ class DemoDataSeeder extends Seeder
                 $this->seedPaymentSchedule($class, $participant, $i, $admins);
             }
         });
+
+        if ($isMain && $participants->isNotEmpty()) {
+            $this->seedGuaranteedPaymentScenarios($class, $participants, $admins);
+        }
+    }
+
+    /**
+     * Guarantee the demo data always contains at least one of each headline
+     * scenario per class in the main organization, regardless of rotation:
+     *  - a fully PAID payment (verified, approved proof, successful transaction)
+     *  - an UNPAID overdue schedule (failed payment, rejected proof)
+     *  - an UNPAID upcoming schedule (no payment attempted yet)
+     *
+     * @param  Collection<int, ClassParticipant>  $participants
+     * @param  Collection<int, User>  $admins
+     */
+    private function seedGuaranteedPaymentScenarios(
+        ClassModel $class,
+        Collection $participants,
+        Collection $admins,
+    ): void {
+        $verifier = $admins->first();
+        $participant = $participants->first();
+        $required = (float) ($class->payment_amount ?? 50);
+
+        // 1. Fully paid, verified, with approved proof + successful transaction.
+        $paidSchedule = PaymentSchedule::factory()->create([
+            'class_id' => $class->id,
+            'class_participant_id' => $participant->id,
+            'period_start' => now()->subWeeks(2),
+            'period_end' => now()->subWeeks(2)->addDays(6),
+            'due_date' => now()->subWeek(),
+            'required_amount' => $required,
+            'status' => 'paid',
+        ]);
+        $paidPayment = Payment::factory()->create([
+            'payment_schedule_id' => $paidSchedule->id,
+            'payer_id' => $participant->user_id,
+            'required_amount' => $required,
+            'additional_infaq' => 10,
+            'total_amount' => $required + 10,
+            'status' => 'paid',
+            'payment_method' => 'qr',
+            'paid_at' => now()->subDays(6),
+            'verified_at' => now()->subDays(5),
+            'verified_by' => $verifier->id,
+        ]);
+        PaymentProof::factory()->create([
+            'payment_id' => $paidPayment->id,
+            'status' => 'approved',
+            'reviewed_at' => $paidPayment->verified_at,
+            'reviewed_by' => $verifier->id,
+        ]);
+        PaymentTransaction::factory()->create([
+            'payment_id' => $paidPayment->id,
+            'request_amount' => $paidPayment->total_amount,
+            'response_status' => 'success',
+            'response_code' => '00',
+            'response_message' => 'Approved',
+            'completed_at' => $paidPayment->paid_at,
+        ]);
+
+        // 2. Unpaid & overdue: failed payment with a rejected proof.
+        $overdueSchedule = PaymentSchedule::factory()->create([
+            'class_id' => $class->id,
+            'class_participant_id' => $participant->id,
+            'period_start' => now()->subMonths(2),
+            'period_end' => now()->subMonths(2)->addDays(6),
+            'due_date' => now()->subMonths(2)->addWeek(),
+            'required_amount' => $required,
+            'status' => 'overdue',
+        ]);
+        $failedPayment = Payment::factory()->create([
+            'payment_schedule_id' => $overdueSchedule->id,
+            'payer_id' => $participant->user_id,
+            'required_amount' => $required,
+            'total_amount' => $required,
+            'status' => 'failed',
+            'payment_method' => 'merchant',
+        ]);
+        PaymentProof::factory()->create([
+            'payment_id' => $failedPayment->id,
+            'status' => 'rejected',
+            'reviewed_at' => now()->subWeeks(3),
+            'reviewed_by' => $verifier->id,
+            'rejection_reason' => 'Resit tidak jelas. Sila muat naik semula.',
+        ]);
+        PaymentTransaction::factory()->create([
+            'payment_id' => $failedPayment->id,
+            'request_amount' => $required,
+            'response_status' => 'failed',
+            'response_code' => 'DECLINED',
+            'response_message' => 'Baki tidak mencukupi.',
+            'completed_at' => now()->subWeeks(3),
+        ]);
+
+        // 3. Unpaid & upcoming: no payment attempted yet.
+        PaymentSchedule::factory()->create([
+            'class_id' => $class->id,
+            'class_participant_id' => $participant->id,
+            'period_start' => now()->addWeek(),
+            'period_end' => now()->addWeek()->addDays(6),
+            'due_date' => now()->addWeeks(2),
+            'required_amount' => $required,
+            'status' => 'upcoming',
+        ]);
     }
 
     /**
