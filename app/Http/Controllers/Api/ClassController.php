@@ -42,10 +42,34 @@ class ClassController extends Controller
     {
         $this->authorize('create', [ClassModel::class, $organization]);
 
-        $class = $organization->classes()->create([
-            ...$request->validated(),
-            'created_by' => $request->user()->id,
-        ]);
+        $validated = $request->validated();
+
+        $class = DB::transaction(function () use ($request, $organization, $validated) {
+            $class = $organization->classes()->create([
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'teacher_name' => $validated['teacher_name'],
+                'status' => $validated['status'] ?? 'draft',
+                'start_date' => $validated['start_date'] ?? null,
+                'end_date' => $validated['end_date'] ?? null,
+                'created_by' => $request->user()->id,
+            ]);
+
+            $class->schedules()->create([
+                'day_of_week' => $validated['day_of_week'],
+                'start_time' => $validated['start_time'],
+                'recurrence_type' => $validated['recurrence_type'],
+                'effective_from' => $validated['start_date'] ?? now()->toDateString(),
+            ]);
+
+            $class->paymentSetting()->create([
+                'required_amount' => $validated['payment_amount'],
+                'currency' => 'MYR',
+                'payment_frequency' => $validated['recurrence_type'],
+            ]);
+
+            return $class->load(['schedules', 'paymentSetting']);
+        });
 
         return $this->successResponse(
             new ClassResource($class),

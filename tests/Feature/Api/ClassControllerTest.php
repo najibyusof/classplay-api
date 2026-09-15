@@ -27,18 +27,60 @@ class ClassControllerTest extends TestCase
         return $admin;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function validClassPayload(array $overrides = []): array
+    {
+        return [
+            'name' => 'Quran Class',
+            'teacher_name' => 'Cikgu Ahmad',
+            'day_of_week' => 1,
+            'start_time' => '10:00',
+            'recurrence_type' => 'weekly',
+            'payment_amount' => 50.00,
+            ...$overrides,
+        ];
+    }
+
     public function test_organization_admin_can_create_class(): void
     {
         $organization = Organization::factory()->create();
         $admin = $this->organizationAdmin($organization);
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson("/api/v1/organizations/{$organization->id}/classes", [
-                'name' => 'Quran Class',
-            ]);
+            ->postJson("/api/v1/organizations/{$organization->id}/classes", $this->validClassPayload());
 
-        $response->assertCreated()->assertJsonPath('data.name', 'Quran Class');
+        $response->assertCreated()
+            ->assertJsonPath('data.name', 'Quran Class')
+            ->assertJsonPath('data.teacher_name', 'Cikgu Ahmad')
+            ->assertJsonPath('data.schedules.0.day_of_week', 1)
+            ->assertJsonPath('data.payment_setting.required_amount', '50.00');
+
         $this->assertDatabaseHas('classes', ['name' => 'Quran Class', 'organization_id' => $organization->id]);
+
+        $class = ClassModel::query()->where('name', 'Quran Class')->firstOrFail();
+        $this->assertDatabaseHas('class_schedules', [
+            'class_id' => $class->id,
+            'day_of_week' => 1,
+            'recurrence_type' => 'weekly',
+        ]);
+        $this->assertDatabaseHas('class_payment_settings', [
+            'class_id' => $class->id,
+            'required_amount' => 50.00,
+            'payment_frequency' => 'weekly',
+        ]);
+    }
+
+    public function test_create_class_requires_schedule_and_payment_fields(): void
+    {
+        $organization = Organization::factory()->create();
+        $admin = $this->organizationAdmin($organization);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/organizations/{$organization->id}/classes", ['name' => 'Quran Class'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['teacher_name', 'day_of_week', 'start_time', 'recurrence_type', 'payment_amount']);
     }
 
     public function test_non_organization_admin_cannot_create_class(): void
@@ -47,7 +89,7 @@ class ClassControllerTest extends TestCase
         $otherAdmin = User::factory()->create(['user_type' => 'admin']);
 
         $this->actingAs($otherAdmin, 'sanctum')
-            ->postJson("/api/v1/organizations/{$organization->id}/classes", ['name' => 'Quran Class'])
+            ->postJson("/api/v1/organizations/{$organization->id}/classes", $this->validClassPayload())
             ->assertForbidden();
     }
 

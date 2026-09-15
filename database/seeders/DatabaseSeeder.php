@@ -17,19 +17,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolePermissionSeeder::class);
 
-        // User::factory(10)->create();
-
-        $testUser = User::query()->firstOrCreate(
-            ['phone' => '+60123456789'],
-            [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'password' => 'password',
-                'user_type' => 'admin',
-            ]
-        );
-
-        // WithoutModelEvents suppresses the User::saved role-sync hook during seeding.
-        $testUser->syncRoleFromUserType();
+        // WithoutModelEvents suppresses the User::saved role-sync hook during
+        // seeding; DemoDataSeeder syncs roles for its accounts explicitly.
+        $this->call(DemoDataSeeder::class);
     }
 }

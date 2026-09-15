@@ -34,17 +34,37 @@ These class detail, update, delete, and activation routes use scoped model bindi
 
 ### Create Class Example (`POST /api/v1/organizations/1/classes`)
 
+A single request creates the class, its first recurring schedule (Day / Time / Frequency), and its payment setting (Payment Amount) in one atomic database transaction.
+
+#### Request Body
+
+| Field             | Type    | Required | Description                                                        |
+| ----------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `name`            | string  | Yes      | Class name, max 150 chars                                          |
+| `teacher_name`    | string  | Yes      | Teacher name, max 150 chars                                        |
+| `description`     | string  | No       | Free-text description                                              |
+| `status`          | string  | No       | `draft` (default), `active`, `inactive`, `completed`               |
+| `start_date`      | date    | No       | First day of the class                                             |
+| `end_date`        | date    | No       | Last day; must be on/after `start_date`                            |
+| `day_of_week`     | integer | Yes      | Session day: `0` = Sunday … `6` = Saturday                         |
+| `start_time`      | string  | Yes      | Session start time, `HH:MM` 24-hour format (e.g. `10:00`)          |
+| `recurrence_type` | string  | Yes      | `weekly`, `fortnightly`, or `monthly`; also sets payment frequency |
+| `payment_amount`  | number  | Yes      | Required payment amount in MYR (e.g. `50.00`)                      |
+
 ```json
 {
-    "name": "Form 5 Physics",
-    "description": "Weekly SPM Physics class",
+    "name": "Quran Class",
     "teacher_name": "Cikgu Ahmad",
-    "start_date": "2026-01-01",
-    "end_date": "2026-12-31"
+    "day_of_week": 1,
+    "start_time": "10:00",
+    "recurrence_type": "weekly",
+    "payment_amount": 50.0
 }
 ```
 
 #### Success Response (`201 Created`)
+
+The response includes the created `schedules` and `payment_setting` resources.
 
 ```json
 {
@@ -53,16 +73,69 @@ These class detail, update, delete, and activation routes use scoped model bindi
     "data": {
         "id": 10,
         "organization_id": 1,
-        "name": "Form 5 Physics",
-        "description": "Weekly SPM Physics class",
+        "name": "Quran Class",
+        "description": null,
         "teacher_name": "Cikgu Ahmad",
         "status": "draft",
-        "start_date": "2026-01-01",
-        "end_date": "2026-12-31",
-        "created_at": "2026-09-12T10:00:00.000000Z"
+        "start_date": null,
+        "end_date": null,
+        "created_by": 1,
+        "schedules": [
+            {
+                "id": 5,
+                "class_id": 10,
+                "day_of_week": 1,
+                "start_time": "10:00:00",
+                "end_time": null,
+                "timezone": null,
+                "recurrence_type": "weekly",
+                "effective_from": "2026-09-15",
+                "effective_until": null
+            }
+        ],
+        "payment_setting": {
+            "id": 5,
+            "class_id": 10,
+            "required_amount": "50.00",
+            "currency": "MYR",
+            "payment_frequency": "weekly",
+            "bank_name": null,
+            "bank_account_name": null,
+            "bank_account_number": null,
+            "qr_code_path": null,
+            "merchant_payment_url": null,
+            "allow_additional_infaq": null,
+            "minimum_infaq": null,
+            "maximum_infaq": null,
+            "reminder_enabled": null,
+            "reminder_days_before": null,
+            "reminder_days_after": null
+        },
+        "created_at": "2026-09-15T10:00:00.000000Z",
+        "updated_at": "2026-09-15T10:00:00.000000Z"
     }
 }
 ```
+
+#### Validation Error (`422 Unprocessable Content`)
+
+Missing any of the required schedule/payment fields returns field-level errors:
+
+```json
+{
+    "success": false,
+    "message": "The given data was invalid.",
+    "errors": {
+        "teacher_name": ["The teacher name field is required."],
+        "day_of_week": ["The day of week field is required."],
+        "start_time": ["The start time field is required."],
+        "recurrence_type": ["The recurrence type field is required."],
+        "payment_amount": ["The payment amount field is required."]
+    }
+}
+```
+
+> **Note:** The class is created with status `draft` by default. Use the activate endpoint (section 4) to make it active and generate payment schedules for participants. Bank details, QR code, and infaq limits are configured separately via the payment-setting endpoints (section 3).
 
 ---
 

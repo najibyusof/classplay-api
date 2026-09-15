@@ -24,6 +24,8 @@ class ClassResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'created_by' => $this->created_by,
+            'schedules' => ClassScheduleResource::collection($this->whenLoaded('schedules')),
+            'payment_setting' => new ClassPaymentSettingResource($this->whenLoaded('paymentSetting')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

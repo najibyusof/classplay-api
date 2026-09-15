@@ -152,8 +152,14 @@ class RbacAuthorizationTest extends TestCase
         $student = User::factory()->create(['user_type' => 'student']);
 
         Sanctum::actingAs($student);
-        $this->postJson("/api/v1/organizations/{$organization->id}/classes", ['name' => 'Quran Class'])
-            ->assertForbidden();
+        $this->postJson("/api/v1/organizations/{$organization->id}/classes", [
+            'name' => 'Quran Class',
+            'teacher_name' => 'Cikgu Ahmad',
+            'day_of_week' => 1,
+            'start_time' => '10:00',
+            'recurrence_type' => 'weekly',
+            'payment_amount' => 50.00,
+        ])->assertForbidden();
     }
 
     // 11. Student cannot verify a payment.
