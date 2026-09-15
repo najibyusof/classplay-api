@@ -17,6 +17,24 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
+     * Common Malaysian Malay names for realistic seeded data.
+     *
+     * @var array<int, string>
+     */
+    private const MALAY_NAMES = [
+        'Ahmad Faizal bin Abdullah', 'Nurul Aisyah binti Rahman', 'Muhammad Hafiz bin Ismail',
+        'Siti Nurhaliza binti Osman', 'Mohamad Ridzuan bin Hassan', 'Nur Aina binti Zulkifli',
+        'Aiman Hakim bin Roslan', 'Nurul Izzah binti Hamid', 'Muhammad Danish bin Yusof',
+        'Siti Mariam binti Jaafar', 'Amirul Ashraf bin Karim', 'Nur Syafiqah binti Aziz',
+        'Mohd Faiz bin Bakar', 'Wan Nurul Huda binti Wan Ahmad', 'Muhammad Aqil bin Nordin',
+        'Siti Zubaidah binti Mokhtar', 'Haziq Imran bin Salleh', 'Nurul Farhana binti Kadir',
+        'Ahmad Syakir bin Majid', 'Nor Akmal binti Harun', 'Muhammad Irfan bin Latif',
+        'Siti Khadijah binti Md Noor', 'Arif Fikri bin Zainal', 'Nurul Amira binti Rosli',
+        'Mohd Hafizuddin bin Saad', 'Wan Siti Aishah binti Wan Omar', 'Ahmad Najib bin Razak',
+        'Nur Hazwani binti Jalil', 'Muhammad Luqman bin Halim', 'Siti Rohana binti Deris',
+    ];
+
+    /**
      * Define the model's default state.
      *
      * Phone numbers use real Malaysian prefixes so they pass the
@@ -29,7 +47,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->randomElement(self::MALAY_NAMES),
             'phone' => '+60'.fake()->unique()->numerify(fake()->randomElement([
                 '11########',   // 011 mobile (10 digits)
                 '1#########',  // 012-019 mobile (9 digits)
