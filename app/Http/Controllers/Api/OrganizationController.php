@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Concerns\ApiResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Organization\StoreOrganizationLogoRequest;
 use App\Http\Requests\Organization\StoreOrganizationRequest;
 use App\Http\Requests\Organization\UpdateOrganizationRequest;
 use App\Http\Resources\OrganizationResource;
@@ -12,6 +13,7 @@ use App\Models\SponsorStudent;
 use App\Services\Organization\OrganizationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class OrganizationController extends Controller
@@ -110,6 +112,24 @@ class OrganizationController extends Controller
         $organization = $this->organizationService->update($organization, $request->validated(), $request->user());
 
         return $this->successResponse(new OrganizationResource($organization), 'Organization updated successfully.');
+    }
+
+    public function uploadLogo(StoreOrganizationLogoRequest $request, Organization $organization): JsonResponse
+    {
+        $this->authorize('update', $organization);
+
+        $path = $request->file('logo')->store('organization-logos', 'public');
+
+        if ($organization->logo_path) {
+            Storage::disk('public')->delete($organization->logo_path);
+        }
+
+        $organization->update(['logo_path' => $path]);
+
+        return $this->successResponse(
+            new OrganizationResource($organization->refresh()),
+            'Organization logo uploaded successfully.'
+        );
     }
 
     public function destroy(Request $request, Organization $organization): JsonResponse

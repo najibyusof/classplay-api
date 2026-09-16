@@ -63,6 +63,7 @@ See [dashboard.md](dashboard.md) and [reports.md](reports.md) for response field
 | `POST`   | `/admin/organizations`                              | `name`, optional `code`, `description`, `status` (`active` or `inactive`) |
 | `GET`    | `/admin/organizations/{organization}`               | None                                                                      |
 | `PUT     | PATCH`                                              | `/admin/organizations/{organization}`                                     | Any create field; all fields optional                    |
+| `POST`   | `/admin/organizations/{organization}/logo`           | Multipart `logo` image: JPG, JPEG, PNG, or WEBP; max 2 MB                 |
 | `DELETE` | `/admin/organizations/{organization}`               | None                                                                      |
 | `GET`    | `/admin/organizations/{organization}/admins`        | None                                                                      |
 | `POST`   | `/admin/organizations/{organization}/admins`        | `user_id`, optional `is_primary`                                          |
@@ -115,7 +116,7 @@ Use the organization-scoped class detail routes for new mobile clients. The lega
 | `POST`       | `/classes/{class}/payment-setting`                       | Amount, currency, frequency, bank, infaq, and reminder settings                                                                                                                                                                                                                                    |
 | `PUT         | PATCH`                                                   | `/classes/{class}/payment-setting`                                                                                                                                                                                                                                                                 | Payment-setting fields; all update fields optional |
 | `DELETE`     | `/classes/{class}/payment-setting`                       | None                                                                                                                                                                                                                                                                                               |
-| `POST`       | `/classes/{class}/payment-setting/qr-code`               | Multipart field `file`; image `jpg`, `jpeg`, `png`, or `webp`, max 5 MB                                                                                                                                                                                                                            |
+| `POST`       | `/classes/{class}/payment-setting/qr-code`               | Multipart field `qr_code`; image `jpg`, `jpeg`, `png`, or `webp`, max 2 MB                                                                                                                                                                                                                          |
 
 Class activation is an atomic operation. The class must be ready for activation and its active participants receive generated payment schedules. See [classes.md](classes.md).
 

@@ -148,6 +148,36 @@ Soft-deletes the organization (never a hard delete). Records an `organization.de
 
 `id` here is the administrator's **user id**. Passwords, password hashes, and Sanctum tokens are never included (`OrganizationAdminResource` only exposes the fields above).
 
+### `POST /admin/organizations/{organization}/logo`
+
+Uploads and replaces the organization's logo. The request must use `multipart/form-data` with a required `logo` image field. Accepted formats are JPG, JPEG, PNG, and WEBP; maximum size is 2 MB.
+
+The file is stored on the configured `public` disk under `organization-logos/`, and the generated storage path is saved to `organizations.logo_path`. If an existing logo is present, it is deleted after the new file is stored.
+
+```text
+POST /api/v1/admin/organizations/1/logo
+Content-Type: multipart/form-data
+Authorization: Bearer {token}
+
+logo: organization-logo.png
+```
+
+Success response (`200 OK`):
+
+```json
+{
+    "success": true,
+    "message": "Organization logo uploaded successfully.",
+    "data": {
+        "id": 1,
+        "name": "Pusat Tahfiz Al-Amin",
+        "logo_path": "organization-logos/abc123.png"
+    }
+}
+```
+
+The operation requires `organization.update` permission and an active organization-admin assignment. Missing or invalid files return `422`; unauthorized users return `403`.
+
 ### `POST /admin/organizations/{organization}/admins`
 
 ```json

@@ -149,6 +149,7 @@ class OpenApiController
             str_contains($name, 'payment.webhook') || str_contains($name, 'webhooks.payments') => ['$ref' => '#/components/schemas/PaymentWebhookRequest'],
             str_contains($name, 'payments.proofs.store') => ['$ref' => '#/components/schemas/PaymentProofUploadRequest'],
             str_contains($name, 'payment-setting.qr-code') => ['$ref' => '#/components/schemas/QrCodeUploadRequest'],
+            str_contains($name, 'organizations.logo') => ['$ref' => '#/components/schemas/OrganizationLogoUploadRequest'],
             str_contains($name, 'devices.store') || str_contains($name, 'user-devices.store') => ['$ref' => '#/components/schemas/StoreDeviceRequest'],
             str_contains($name, 'classes.store') => ['$ref' => '#/components/schemas/StoreClassRequest'],
             str_contains($name, 'classes.update') => ['$ref' => '#/components/schemas/UpdateClassRequest'],
@@ -161,7 +162,9 @@ class OpenApiController
             default => ['type' => 'object', 'additionalProperties' => true],
         };
 
-        $isMultipart = str_contains($name, 'payments.proofs.store') || str_contains($name, 'payment-setting.qr-code');
+        $isMultipart = str_contains($name, 'payments.proofs.store')
+            || str_contains($name, 'payment-setting.qr-code')
+            || str_contains($name, 'organizations.logo');
 
         return [
             'required' => ! in_array($name, ['v1.auth.logout', 'v1.auth.refresh-token'], true),
@@ -416,6 +419,7 @@ class OpenApiController
             'PaymentWebhookRequest' => ['type' => 'object', 'required' => ['gateway_reference', 'status'], 'properties' => ['gateway_reference' => $string(), 'transaction_reference' => $string(), 'status' => ['type' => 'string', 'enum' => ['paid', 'failed', 'success', 'successful', 'completed']], 'amount' => $number(), 'currency' => ['type' => 'string', 'example' => 'MYR'], 'event_id' => $string(), 'response_code' => $string(), 'response_message' => $string()]],
             'PaymentProofUploadRequest' => ['type' => 'object', 'required' => ['file'], 'properties' => ['file' => ['type' => 'string', 'format' => 'binary', 'description' => 'JPG, JPEG, PNG, or WEBP image; max 5 MB']]],
             'QrCodeUploadRequest' => ['type' => 'object', 'required' => ['qr_code'], 'properties' => ['qr_code' => ['type' => 'string', 'format' => 'binary', 'description' => 'JPG, JPEG, PNG, or WEBP image; max 2 MB']]],
+            'OrganizationLogoUploadRequest' => ['type' => 'object', 'required' => ['logo'], 'properties' => ['logo' => ['type' => 'string', 'format' => 'binary', 'description' => 'JPG, JPEG, PNG, or WEBP image; max 2 MB']]],
             'StoreDeviceRequest' => ['type' => 'object', 'required' => ['device_token', 'platform'], 'properties' => ['device_token' => $string(), 'platform' => ['type' => 'string', 'enum' => ['android', 'ios']], 'device_name' => $string(), 'app_version' => $string()]],
             'StoreOrganizationRequest' => ['type' => 'object', 'required' => ['name'], 'properties' => ['name' => $string(), 'code' => $string(), 'description' => $string(), 'logo_path' => $string(), 'status' => ['type' => 'string', 'enum' => ['active', 'inactive']]]],
             'StoreClassRequest' => ['type' => 'object', 'required' => ['name', 'teacher_name', 'day_of_week', 'start_time', 'recurrence_type', 'payment_amount'], 'properties' => ['name' => $string('e.g. Quran Class'), 'description' => $string(), 'teacher_name' => $string('e.g. Cikgu Ahmad'), 'status' => ['type' => 'string', 'enum' => ['draft', 'active', 'inactive', 'completed']], 'start_date' => ['type' => 'string', 'format' => 'date'], 'end_date' => ['type' => 'string', 'format' => 'date'], 'day_of_week' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 6, 'description' => '0 = Sunday, 1 = Monday, ... 6 = Saturday. Stored on the class and used to create the first class schedule.', 'example' => 1], 'start_time' => ['type' => 'string', 'format' => 'HH:MM', 'description' => 'Stored on the class and used to create the first class schedule.', 'example' => '10:00'], 'recurrence_type' => ['type' => 'string', 'enum' => ['weekly', 'fortnightly', 'monthly'], 'description' => 'Stored on the class as its frequency; also seeds the first class schedule and the payment frequency'], 'payment_amount' => ['type' => 'number', 'format' => 'double', 'minimum' => 0, 'description' => 'Required payment amount in MYR; stored on the class and copied to the payment setting', 'example' => 50.00]]],

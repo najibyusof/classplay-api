@@ -216,7 +216,35 @@ Returns the updated class using the same shape as the view response above.
 | `POST`       | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Create payment configuration               |
 | `PUT\|PATCH` | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Update payment configuration               |
 | `DELETE`     | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Delete payment configuration               |
-| `POST`       | `/api/v1/classes/{class}/payment-setting/qr-code` | `class.update` & Org Admin | Upload DuitNow / Touch 'n Go QR code image |
+| `POST`       | `/api/v1/classes/{class}/payment-setting/qr-code` | `class.update` & Org Admin | Upload DuitNow / Touch 'n Go QR code image (`multipart/form-data`, field `qr_code`, JPG/JPEG/PNG/WEBP, max 2 MB) |
+
+### QR code upload
+
+```text
+POST /api/v1/classes/10/payment-setting/qr-code
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+
+qr_code: payment-qr.png
+```
+
+The uploaded file is stored on the configured `public` disk under `qr-codes/`, and its generated path is saved to `class_payment_settings.qr_code_path`. If the class already has a QR code, the previous file is deleted after the new file is stored.
+
+Success response (`200 OK`):
+
+```json
+{
+    "success": true,
+    "message": "QR code uploaded successfully.",
+    "data": {
+        "id": 10,
+        "class_id": 10,
+        "qr_code_path": "qr-codes/abc123.png"
+    }
+}
+```
+
+Missing or invalid files return `422`; users without `class.update` permission or organization access receive `403`.
 
 ### Payment Setting Body Example (`POST /api/v1/classes/10/payment-setting`)
 

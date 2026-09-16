@@ -6,6 +6,8 @@ use App\Models\Organization;
 use App\Models\OrganizationAdmin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OrganizationControllerTest extends TestCase
@@ -66,5 +68,84 @@ class OrganizationControllerTest extends TestCase
             ->getJson("/api/v1/admin/organizations/{$organization->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $organization->id);
+    }
+
+    public function test_admin_can_upload_organization_logo(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['user_type' => 'admin']);
+        $organization = Organization::factory()->create(['created_by' => $admin->id]);
+        OrganizationAdmin::factory()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/admin/organizations/{$organization->id}/logo", [
+                'logo' => UploadedFile::fake()->image('logo.png'),
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Organization logo uploaded successfully.')
+            ->assertJsonPath('data.logo_path', $organization->fresh()->logo_path);
+
+        Storage::disk('public')->assertExists($organization->fresh()->logo_path);
+        $this->assertDatabaseMissing('organizations', ['id' => $organization->id, 'logo_path' => null]);
+    }
+
+    public function test_uploading_a_new_organization_logo_removes_the_previous_file(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['user_type' => 'admin']);
+        $oldPath = 'organization-logos/old-logo.png';
+        Storage::disk('public')->put($oldPath, 'old logo');
+        $organization = Organization::factory()->create([
+            'created_by' => $admin->id,
+            'logo_path' => $oldPath,
+        ]);
+        OrganizationAdmin::factory()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/admin/organizations/{$organization->id}/logo", [
+                'logo' => UploadedFile::fake()->image('new-logo.jpg'),
+            ])
+            ->assertOk();
+
+        Storage::disk('public')->assertMissing($oldPath);
+        Storage::disk('public')->assertExists($organization->fresh()->logo_path);
+    }
+
+    public function test_non_admin_cannot_upload_an_organization_logo(): void
+    {
+        Storage::fake('public');
+        $organization = Organization::factory()->create();
+        $otherAdmin = User::factory()->create(['user_type' => 'admin']);
+
+        $this->actingAs($otherAdmin, 'sanctum')
+            ->postJson("/api/v1/admin/organizations/{$organization->id}/logo", [
+                'logo' => UploadedFile::fake()->image('logo.png'),
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_organization_logo_upload_requires_an_image(): void
+    {
+        $admin = User::factory()->create(['user_type' => 'admin']);
+        $organization = Organization::factory()->create(['created_by' => $admin->id]);
+        OrganizationAdmin::factory()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/admin/organizations/{$organization->id}/logo", [])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['logo']);
     }
 }
