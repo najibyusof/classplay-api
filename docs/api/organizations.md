@@ -148,6 +148,20 @@ Soft-deletes the organization (never a hard delete). Records an `organization.de
 
 `id` here is the administrator's **user id**. Passwords, password hashes, and Sanctum tokens are never included (`OrganizationAdminResource` only exposes the fields above).
 
+### `GET /admin/organizations/{organization}/logo`
+
+Returns a ready-to-display absolute URL for the organization's logo, or `null` when none is uploaded. `logo_path` (the raw storage path) is also included on the organization resource in every other response; this endpoint exists for clients that only need the displayable URL.
+
+```json
+{
+    "success": true,
+    "message": "Organization logo URL retrieved successfully.",
+    "data": {
+        "logo_url": "http://localhost/storage/organization-logos/abc123.png"
+    }
+}
+```
+
 ### `POST /admin/organizations/{organization}/logo`
 
 Uploads and replaces the organization's logo. The request must use `multipart/form-data` with a required `logo` image field. Accepted formats are JPG, JPEG, PNG, and WEBP; maximum size is 2 MB.

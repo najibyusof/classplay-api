@@ -20,6 +20,7 @@ class OrganizationResource extends JsonResource
             'code' => $this->code,
             'description' => $this->description,
             'logo_path' => $this->logo_path,
+            'logo_url' => $this->logo_url,
             'status' => $this->status,
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,

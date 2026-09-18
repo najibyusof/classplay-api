@@ -65,6 +65,7 @@ Route::prefix('v1')->name('v1.')->group(function () {
             Route::post('/', [OrganizationController::class, 'store'])->name('store');
             Route::get('/{organization}', [OrganizationController::class, 'show'])->name('show');
             Route::match(['put', 'patch'], '/{organization}', [OrganizationController::class, 'update'])->name('update');
+            Route::get('/{organization}/logo', [OrganizationController::class, 'showLogo'])->name('logo.show');
             Route::post('/{organization}/logo', [OrganizationController::class, 'uploadLogo'])->name('logo');
             Route::delete('/{organization}', [OrganizationController::class, 'destroy'])->name('destroy');
 

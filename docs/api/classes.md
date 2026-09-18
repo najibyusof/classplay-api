@@ -210,12 +210,12 @@ Returns the updated class using the same shape as the view response above.
 
 ## 3. Class Payment Settings
 
-| Method       | Endpoint                                          | Authorization              | Description                                |
-| ------------ | ------------------------------------------------- | -------------------------- | ------------------------------------------ |
-| `GET`        | `/api/v1/classes/{class}/payment-setting`         | `class.view`               | View payment configuration for a class     |
-| `POST`       | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Create payment configuration               |
-| `PUT\|PATCH` | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Update payment configuration               |
-| `DELETE`     | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Delete payment configuration               |
+| Method       | Endpoint                                          | Authorization              | Description                                                                                                      |
+| ------------ | ------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `GET`        | `/api/v1/classes/{class}/payment-setting`         | `class.view`               | View payment configuration for a class                                                                           |
+| `POST`       | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Create payment configuration                                                                                     |
+| `PUT\|PATCH` | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Update payment configuration                                                                                     |
+| `DELETE`     | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Delete payment configuration                                                                                     |
 | `POST`       | `/api/v1/classes/{class}/payment-setting/qr-code` | `class.update` & Org Admin | Upload DuitNow / Touch 'n Go QR code image (`multipart/form-data`, field `qr_code`, JPG/JPEG/PNG/WEBP, max 2 MB) |
 
 ### QR code upload

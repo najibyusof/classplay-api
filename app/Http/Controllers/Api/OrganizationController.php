@@ -114,6 +114,16 @@ class OrganizationController extends Controller
         return $this->successResponse(new OrganizationResource($organization), 'Organization updated successfully.');
     }
 
+    public function showLogo(Organization $organization): JsonResponse
+    {
+        $this->authorize('view', $organization);
+
+        return $this->successResponse(
+            ['logo_url' => $organization->logo_url],
+            'Organization logo URL retrieved successfully.'
+        );
+    }
+
     public function uploadLogo(StoreOrganizationLogoRequest $request, Organization $organization): JsonResponse
     {
         $this->authorize('update', $organization);

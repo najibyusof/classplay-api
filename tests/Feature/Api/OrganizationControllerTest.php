@@ -148,4 +148,50 @@ class OrganizationControllerTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['logo']);
     }
+
+    public function test_admin_can_get_organization_logo_url(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['user_type' => 'admin']);
+        $organization = Organization::factory()->create([
+            'created_by' => $admin->id,
+            'logo_path' => 'organization-logos/logo.png',
+        ]);
+        OrganizationAdmin::factory()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/v1/admin/organizations/{$organization->id}/logo")
+            ->assertOk()
+            ->assertJsonPath('data.logo_url', Storage::disk('public')->url('organization-logos/logo.png'));
+    }
+
+    public function test_organization_logo_url_is_null_when_no_logo_uploaded(): void
+    {
+        $admin = User::factory()->create(['user_type' => 'admin']);
+        $organization = Organization::factory()->create(['created_by' => $admin->id, 'logo_path' => null]);
+        OrganizationAdmin::factory()->create([
+            'organization_id' => $organization->id,
+            'user_id' => $admin->id,
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/v1/admin/organizations/{$organization->id}/logo")
+            ->assertOk()
+            ->assertJsonPath('data.logo_url', null);
+    }
+
+    public function test_non_admin_cannot_get_organization_logo_url(): void
+    {
+        $organization = Organization::factory()->create(['logo_path' => 'organization-logos/logo.png']);
+        $otherAdmin = User::factory()->create(['user_type' => 'admin']);
+
+        $this->actingAs($otherAdmin, 'sanctum')
+            ->getJson("/api/v1/admin/organizations/{$organization->id}/logo")
+            ->assertForbidden();
+    }
 }
