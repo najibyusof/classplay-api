@@ -57,19 +57,20 @@ See [dashboard.md](dashboard.md) and [reports.md](reports.md) for response field
 
 ### Organizations and Administrators
 
-| Method   | Path                                                | Body                                                                      |
-| -------- | --------------------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `GET`    | `/admin/organizations`                              | Query: `page`, `per_page`, `status`, `search`                             |
-| `POST`   | `/admin/organizations`                              | `name`, optional `code`, `description`, `status` (`active` or `inactive`) |
-| `GET`    | `/admin/organizations/{organization}`               | None                                                                      |
-| `PUT     | PATCH`                                              | `/admin/organizations/{organization}`                                     | Any create field; all fields optional                    |
-| `GET`    | `/admin/organizations/{organization}/logo`          | None; returns `logo_url`                                                  |
-| `POST`   | `/admin/organizations/{organization}/logo`          | Multipart `logo` image: JPG, JPEG, PNG, or WEBP; max 2 MB                 |
-| `DELETE` | `/admin/organizations/{organization}`               | None                                                                      |
-| `GET`    | `/admin/organizations/{organization}/admins`        | None                                                                      |
-| `POST`   | `/admin/organizations/{organization}/admins`        | `user_id`, optional `is_primary`                                          |
-| `PUT     | PATCH`                                              | `/admin/organizations/{organization}/admins/{user}`                       | Optional `is_primary`, `status` (`active` or `inactive`) |
-| `DELETE` | `/admin/organizations/{organization}/admins/{user}` | None                                                                      |
+| Method   | Path                                                | Body                                                                                     |
+| -------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `GET`    | `/admin/organizations`                              | Query: `page`, `per_page`, `status`, `search`                                            |
+| `POST`   | `/admin/organizations`                              | `name`, optional `code`, `description`, `status` (`active` or `inactive`)                |
+| `GET`    | `/admin/organizations/{organization}`               | None                                                                                     |
+| `PUT     | PATCH`                                              | `/admin/organizations/{organization}`                                                    | Any create field; all fields optional                    |
+| `GET`    | `/admin/organizations/{organization}/logo`          | None; returns `logo_url`                                                                 |
+| `GET`    | `/organizations/{organization}/logo-file`           | None; streams the logo image, unauthenticated (see [organizations.md](organizations.md)) |
+| `POST`   | `/admin/organizations/{organization}/logo`          | Multipart `logo` image: JPG, JPEG, PNG, or WEBP; max 2 MB                                |
+| `DELETE` | `/admin/organizations/{organization}`               | None                                                                                     |
+| `GET`    | `/admin/organizations/{organization}/admins`        | None                                                                                     |
+| `POST`   | `/admin/organizations/{organization}/admins`        | `user_id`, optional `is_primary`                                                         |
+| `PUT     | PATCH`                                              | `/admin/organizations/{organization}/admins/{user}`                                      | Optional `is_primary`, `status` (`active` or `inactive`) |
+| `DELETE` | `/admin/organizations/{organization}/admins/{user}` | None                                                                                     |
 
 Creating an organization assigns the creator as its primary active administrator. The `{user}` administrator path parameter is a **user ID**, not an `organization_admins` pivot ID. See [organizations.md](organizations.md).
 

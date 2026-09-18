@@ -51,6 +51,9 @@ Route::prefix('v1')->name('v1.')->group(function () {
     Route::post('webhooks/payments/{gateway}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
     Route::post('payment/webhook/{provider}', [PaymentWebhookController::class, 'handle'])->name('payment.webhook');
 
+    // Public logo file stream: not gated by auth:sanctum so it can be opened directly in a browser, matching a static asset URL.
+    Route::get('organizations/{organization}/logo-file', [OrganizationController::class, 'streamLogo'])->name('organizations.logo-file');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('admin/organizations/{organization}/dashboard', [DashboardController::class, 'organizationDashboard'])->name('admin.organizations.dashboard');

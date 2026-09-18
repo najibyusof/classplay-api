@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class Organization extends Model
 {
@@ -29,7 +28,7 @@ class Organization extends Model
     protected function logoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null,
+            get: fn (): ?string => $this->logo_path ? route('v1.organizations.logo-file', $this) : null,
         );
     }
 

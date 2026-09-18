@@ -166,7 +166,7 @@ class OrganizationControllerTest extends TestCase
         $this->actingAs($admin, 'sanctum')
             ->getJson("/api/v1/admin/organizations/{$organization->id}/logo")
             ->assertOk()
-            ->assertJsonPath('data.logo_url', Storage::disk('public')->url('organization-logos/logo.png'));
+            ->assertJsonPath('data.logo_url', route('v1.organizations.logo-file', $organization));
     }
 
     public function test_organization_logo_url_is_null_when_no_logo_uploaded(): void
@@ -193,5 +193,34 @@ class OrganizationControllerTest extends TestCase
         $this->actingAs($otherAdmin, 'sanctum')
             ->getJson("/api/v1/admin/organizations/{$organization->id}/logo")
             ->assertForbidden();
+    }
+
+    public function test_logo_file_streams_without_authentication(): void
+    {
+        Storage::fake('public');
+        $path = 'organization-logos/logo.png';
+        Storage::disk('public')->put($path, UploadedFile::fake()->image('logo.png')->getContent());
+        $organization = Organization::factory()->create(['logo_path' => $path]);
+
+        $this->get("/api/v1/organizations/{$organization->id}/logo-file")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/png');
+    }
+
+    public function test_logo_file_returns_404_when_no_logo_uploaded(): void
+    {
+        $organization = Organization::factory()->create(['logo_path' => null]);
+
+        $this->get("/api/v1/organizations/{$organization->id}/logo-file")
+            ->assertNotFound();
+    }
+
+    public function test_logo_file_returns_404_when_stored_file_is_missing(): void
+    {
+        Storage::fake('public');
+        $organization = Organization::factory()->create(['logo_path' => 'organization-logos/missing.png']);
+
+        $this->get("/api/v1/organizations/{$organization->id}/logo-file")
+            ->assertNotFound();
     }
 }

@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrganizationController extends Controller
 {
@@ -122,6 +123,18 @@ class OrganizationController extends Controller
             ['logo_url' => $organization->logo_url],
             'Organization logo URL retrieved successfully.'
         );
+    }
+
+    /**
+     * Stream the logo file directly through the application instead of relying
+     * on the web server serving the `public/storage` symlink, so a missing
+     * symlink or static-file permission issue on the host cannot break viewing.
+     */
+    public function streamLogo(Organization $organization): StreamedResponse
+    {
+        abort_if(! $organization->logo_path || ! Storage::disk('public')->exists($organization->logo_path), 404);
+
+        return Storage::disk('public')->response($organization->logo_path);
     }
 
     public function uploadLogo(StoreOrganizationLogoRequest $request, Organization $organization): JsonResponse

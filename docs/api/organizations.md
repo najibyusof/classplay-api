@@ -150,17 +150,23 @@ Soft-deletes the organization (never a hard delete). Records an `organization.de
 
 ### `GET /admin/organizations/{organization}/logo`
 
-Returns a ready-to-display absolute URL for the organization's logo, or `null` when none is uploaded. `logo_path` (the raw storage path) is also included on the organization resource in every other response; this endpoint exists for clients that only need the displayable URL.
+Returns a ready-to-display URL for the organization's logo, or `null` when none is uploaded. `logo_path` (the raw storage path) is also included on the organization resource in every other response; this endpoint exists for clients that only need the displayable URL.
+
+`logo_url` points at `GET /api/v1/organizations/{organization}/logo-file` (see below) rather than the raw `/storage/...` path, so viewing the logo does not depend on the web server's `public/storage` symlink or static-file permissions being configured correctly on the host — the file is streamed by the application itself.
 
 ```json
 {
     "success": true,
     "message": "Organization logo URL retrieved successfully.",
     "data": {
-        "logo_url": "http://localhost/storage/organization-logos/abc123.png"
+        "logo_url": "http://localhost/api/v1/organizations/1/logo-file"
     }
 }
 ```
+
+### `GET /organizations/{organization}/logo-file`
+
+Streams the logo image directly (no `admin/` prefix, and **no authentication required** — it's meant to be opened directly in a browser or `<img>` tag, like a static asset). Returns `404` when the organization has no logo or the stored file is missing.
 
 ### `POST /admin/organizations/{organization}/logo`
 
