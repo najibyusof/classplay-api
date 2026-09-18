@@ -172,20 +172,20 @@ Supported users:
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | User ID |
-| name | VARCHAR(150) | No | Full name |
-| phone | VARCHAR(30) UNIQUE | No | Login phone number |
-| email | VARCHAR(150) | Yes | Optional email |
-| password | VARCHAR(255) | No | Hashed password |
-| user_type | ENUM | No | `admin`, `student`, `sponsor` |
-| status | ENUM | No | `active`, `inactive`, `suspended` |
-| phone_verified_at | TIMESTAMP | Yes | Phone verification time |
-| last_login_at | TIMESTAMP | Yes | Last successful login |
-| created_at | TIMESTAMP | No | Created time |
-| updated_at | TIMESTAMP | No | Updated time |
-| deleted_at | TIMESTAMP | Yes | Soft deletion |
+| Field             | Type               | Null | Description                       |
+| ----------------- | ------------------ | ---: | --------------------------------- |
+| id                | BIGINT UNSIGNED PK |   No | User ID                           |
+| name              | VARCHAR(150)       |   No | Full name                         |
+| phone             | VARCHAR(30) UNIQUE |   No | Login phone number                |
+| email             | VARCHAR(150)       |  Yes | Optional email                    |
+| password          | VARCHAR(255)       |   No | Hashed password                   |
+| user_type         | ENUM               |   No | `admin`, `student`, `sponsor`     |
+| status            | ENUM               |   No | `active`, `inactive`, `suspended` |
+| phone_verified_at | TIMESTAMP          |  Yes | Phone verification time           |
+| last_login_at     | TIMESTAMP          |  Yes | Last successful login             |
+| created_at        | TIMESTAMP          |   No | Created time                      |
+| updated_at        | TIMESTAMP          |   No | Updated time                      |
+| deleted_at        | TIMESTAMP          |  Yes | Soft deletion                     |
 
 ## Relationships
 
@@ -206,13 +206,13 @@ users 1 ──── * audit_logs
 
 ## 6.1 roles
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| name | VARCHAR(100) UNIQUE |
-| description | VARCHAR(255) NULL |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field       | Type                |
+| ----------- | ------------------- |
+| id          | BIGINT UNSIGNED PK  |
+| name        | VARCHAR(100) UNIQUE |
+| description | VARCHAR(255) NULL   |
+| created_at  | TIMESTAMP           |
+| updated_at  | TIMESTAMP           |
 
 Recommended initial roles:
 
@@ -226,13 +226,13 @@ SPONSOR
 
 ## 6.2 permissions
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| name | VARCHAR(150) UNIQUE |
-| description | VARCHAR(255) NULL |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field       | Type                |
+| ----------- | ------------------- |
+| id          | BIGINT UNSIGNED PK  |
+| name        | VARCHAR(150) UNIQUE |
+| description | VARCHAR(255) NULL   |
+| created_at  | TIMESTAMP           |
+| updated_at  | TIMESTAMP           |
 
 Examples:
 
@@ -265,13 +265,13 @@ notification.send
 
 ## 6.3 user_roles
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| user_id | BIGINT UNSIGNED FK |
-| role_id | BIGINT UNSIGNED FK |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field      | Type               |
+| ---------- | ------------------ |
+| id         | BIGINT UNSIGNED PK |
+| user_id    | BIGINT UNSIGNED FK |
+| role_id    | BIGINT UNSIGNED FK |
+| created_at | TIMESTAMP          |
+| updated_at | TIMESTAMP          |
 
 Constraints:
 
@@ -289,13 +289,13 @@ users * ─── * roles
 
 ## 6.4 role_permissions
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| role_id | BIGINT UNSIGNED FK |
+| Field         | Type               |
+| ------------- | ------------------ |
+| id            | BIGINT UNSIGNED PK |
+| role_id       | BIGINT UNSIGNED FK |
 | permission_id | BIGINT UNSIGNED FK |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| created_at    | TIMESTAMP          |
+| updated_at    | TIMESTAMP          |
 
 Constraints:
 
@@ -319,18 +319,18 @@ Demo Learning Centre
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | Organization ID |
-| name | VARCHAR(200) | No | Organization name |
-| code | VARCHAR(50) UNIQUE | Yes | Optional organization code |
-| description | TEXT | Yes | Description |
-| logo_path | VARCHAR(500) | Yes | Logo |
-| status | ENUM | No | `active`, `inactive` |
-| created_by | BIGINT UNSIGNED FK | No | Admin who created it |
-| created_at | TIMESTAMP | No | Created time |
-| updated_at | TIMESTAMP | No | Updated time |
-| deleted_at | TIMESTAMP | Yes | Soft deletion |
+| Field       | Type               | Null | Description                |
+| ----------- | ------------------ | ---: | -------------------------- |
+| id          | BIGINT UNSIGNED PK |   No | Organization ID            |
+| name        | VARCHAR(200)       |   No | Organization name          |
+| code        | VARCHAR(50) UNIQUE |  Yes | Optional organization code |
+| description | TEXT               |  Yes | Description                |
+| logo_path   | VARCHAR(500)       |  Yes | Logo                       |
+| status      | ENUM               |   No | `active`, `inactive`       |
+| created_by  | BIGINT UNSIGNED FK |   No | Admin who created it       |
+| created_at  | TIMESTAMP          |   No | Created time               |
+| updated_at  | TIMESTAMP          |   No | Updated time               |
+| deleted_at  | TIMESTAMP          |  Yes | Soft deletion              |
 
 ## Relationships
 
@@ -352,15 +352,15 @@ This is preferable to assigning administrators only to individual classes becaus
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| organization_id | BIGINT UNSIGNED FK | No | Organization |
-| user_id | BIGINT UNSIGNED FK | No | Admin |
-| is_primary | BOOLEAN | No | Primary administrator |
-| status | ENUM | No | `active`, `inactive` |
-| created_at | TIMESTAMP | No | Created time |
-| updated_at | TIMESTAMP | No | Updated time |
+| Field           | Type               | Null | Description           |
+| --------------- | ------------------ | ---: | --------------------- |
+| id              | BIGINT UNSIGNED PK |   No | ID                    |
+| organization_id | BIGINT UNSIGNED FK |   No | Organization          |
+| user_id         | BIGINT UNSIGNED FK |   No | Admin                 |
+| is_primary      | BOOLEAN            |   No | Primary administrator |
+| status          | ENUM               |   No | `active`, `inactive`  |
+| created_at      | TIMESTAMP          |   No | Created time          |
+| updated_at      | TIMESTAMP          |   No | Updated time          |
 
 Constraint:
 
@@ -391,20 +391,20 @@ Every class belongs to one organization.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | Class ID |
-| organization_id | BIGINT UNSIGNED FK | No | Owning organization |
-| name | VARCHAR(150) | No | Class name |
-| description | TEXT | Yes | Description |
-| teacher_name | VARCHAR(150) | Yes | Teacher name |
-| status | ENUM | No | `draft`, `active`, `inactive`, `completed` |
-| start_date | DATE | Yes | Class start |
-| end_date | DATE | Yes | Class end |
-| created_by | BIGINT UNSIGNED FK | No | Admin who created it |
-| created_at | TIMESTAMP | No | Created time |
-| updated_at | TIMESTAMP | No | Updated time |
-| deleted_at | TIMESTAMP | Yes | Soft deletion |
+| Field           | Type               | Null | Description                                |
+| --------------- | ------------------ | ---: | ------------------------------------------ |
+| id              | BIGINT UNSIGNED PK |   No | Class ID                                   |
+| organization_id | BIGINT UNSIGNED FK |   No | Owning organization                        |
+| name            | VARCHAR(150)       |   No | Class name                                 |
+| description     | TEXT               |  Yes | Description                                |
+| teacher_name    | VARCHAR(150)       |  Yes | Teacher name                               |
+| status          | ENUM               |   No | `draft`, `active`, `inactive`, `completed` |
+| start_date      | DATE               |  Yes | Class start                                |
+| end_date        | DATE               |  Yes | Class end                                  |
+| created_by      | BIGINT UNSIGNED FK |   No | Admin who created it                       |
+| created_at      | TIMESTAMP          |   No | Created time                               |
+| updated_at      | TIMESTAMP          |   No | Updated time                               |
+| deleted_at      | TIMESTAMP          |  Yes | Soft deletion                              |
 
 ## Critical constraint
 
@@ -436,19 +436,19 @@ Stores when the class occurs.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | Schedule ID |
-| class_id | BIGINT UNSIGNED FK | No | Class |
-| day_of_week | TINYINT | No | 0-6 |
-| start_time | TIME | No | Start |
-| end_time | TIME | Yes | End |
-| timezone | VARCHAR(50) | No | Default `Asia/Kuala_Lumpur` |
-| recurrence_type | ENUM | No | `weekly`, `fortnightly`, `monthly` |
-| effective_from | DATE | No | Schedule start |
-| effective_until | DATE | Yes | Schedule end |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field           | Type               | Null | Description                        |
+| --------------- | ------------------ | ---: | ---------------------------------- |
+| id              | BIGINT UNSIGNED PK |   No | Schedule ID                        |
+| class_id        | BIGINT UNSIGNED FK |   No | Class                              |
+| day_of_week     | TINYINT            |   No | 0-6                                |
+| start_time      | TIME               |   No | Start                              |
+| end_time        | TIME               |  Yes | End                                |
+| timezone        | VARCHAR(50)        |   No | Default `Asia/Kuala_Lumpur`        |
+| recurrence_type | ENUM               |   No | `weekly`, `fortnightly`, `monthly` |
+| effective_from  | DATE               |   No | Schedule start                     |
+| effective_until | DATE               |  Yes | Schedule end                       |
+| created_at      | TIMESTAMP          |   No | Created                            |
+| updated_at      | TIMESTAMP          |   No | Updated                            |
 
 Relationship:
 
@@ -464,26 +464,26 @@ Stores payment rules for a class.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| class_id | BIGINT UNSIGNED FK UNIQUE | No | Class |
-| required_amount | DECIMAL(12,2) | No | Required amount |
-| currency | CHAR(3) | No | `MYR` |
-| payment_frequency | ENUM | No | `weekly`, `fortnightly`, `monthly` |
-| bank_name | VARCHAR(100) | Yes | Bank |
-| bank_account_name | VARCHAR(150) | Yes | Account name |
-| bank_account_number | VARCHAR(100) | Yes | Account number |
-| qr_code_path | VARCHAR(500) | Yes | QR image |
-| merchant_payment_url | TEXT | Yes | Merchant payment URL |
-| allow_additional_infaq | BOOLEAN | No | Allow extra contribution |
-| minimum_infaq | DECIMAL(12,2) | Yes | Minimum extra amount |
-| maximum_infaq | DECIMAL(12,2) | Yes | Maximum extra amount |
-| reminder_enabled | BOOLEAN | No | Enable reminders |
-| reminder_days_before | INT | Yes | Days before due date |
-| reminder_days_after | INT | Yes | Days after due date |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field                  | Type                      | Null | Description                        |
+| ---------------------- | ------------------------- | ---: | ---------------------------------- |
+| id                     | BIGINT UNSIGNED PK        |   No | ID                                 |
+| class_id               | BIGINT UNSIGNED FK UNIQUE |   No | Class                              |
+| required_amount        | DECIMAL(12,2)             |   No | Required amount                    |
+| currency               | CHAR(3)                   |   No | `MYR`                              |
+| payment_frequency      | ENUM                      |   No | `weekly`, `fortnightly`, `monthly` |
+| bank_name              | VARCHAR(100)              |  Yes | Bank                               |
+| bank_account_name      | VARCHAR(150)              |  Yes | Account name                       |
+| bank_account_number    | VARCHAR(100)              |  Yes | Account number                     |
+| qr_code_path           | VARCHAR(500)              |  Yes | QR image                           |
+| merchant_payment_url   | TEXT                      |  Yes | Merchant payment URL               |
+| allow_additional_infaq | BOOLEAN                   |   No | Allow extra contribution           |
+| minimum_infaq          | DECIMAL(12,2)             |  Yes | Minimum extra amount               |
+| maximum_infaq          | DECIMAL(12,2)             |  Yes | Maximum extra amount               |
+| reminder_enabled       | BOOLEAN                   |   No | Enable reminders                   |
+| reminder_days_before   | INT                       |  Yes | Days before due date               |
+| reminder_days_after    | INT                       |  Yes | Days after due date                |
+| created_at             | TIMESTAMP                 |   No | Created                            |
+| updated_at             | TIMESTAMP                 |   No | Updated                            |
 
 Relationship:
 
@@ -504,17 +504,17 @@ This table supports both:
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| class_id | BIGINT UNSIGNED FK | No | Class |
-| user_id | BIGINT UNSIGNED FK | No | Participant |
-| participant_type | ENUM | No | `student`, `sponsor` |
-| status | ENUM | No | `active`, `inactive`, `removed` |
-| joined_at | TIMESTAMP | No | Joined |
-| left_at | TIMESTAMP | Yes | Left class |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field            | Type               | Null | Description                     |
+| ---------------- | ------------------ | ---: | ------------------------------- |
+| id               | BIGINT UNSIGNED PK |   No | ID                              |
+| class_id         | BIGINT UNSIGNED FK |   No | Class                           |
+| user_id          | BIGINT UNSIGNED FK |   No | Participant                     |
+| participant_type | ENUM               |   No | `student`, `sponsor`            |
+| status           | ENUM               |   No | `active`, `inactive`, `removed` |
+| joined_at        | TIMESTAMP          |   No | Joined                          |
+| left_at          | TIMESTAMP          |  Yes | Left class                      |
+| created_at       | TIMESTAMP          |   No | Created                         |
+| updated_at       | TIMESTAMP          |   No | Updated                         |
 
 Constraint:
 
@@ -546,17 +546,17 @@ Defines sponsor-to-student relationships.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| sponsor_id | BIGINT UNSIGNED FK -> users.id | No | Sponsor |
-| student_id | BIGINT UNSIGNED FK -> users.id | No | Student |
-| relationship_type | VARCHAR(100) | Yes | Optional relationship |
-| status | ENUM | No | `active`, `inactive` |
-| start_date | DATE | Yes | Start |
-| end_date | DATE | Yes | End |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field             | Type                           | Null | Description           |
+| ----------------- | ------------------------------ | ---: | --------------------- |
+| id                | BIGINT UNSIGNED PK             |   No | ID                    |
+| sponsor_id        | BIGINT UNSIGNED FK -> users.id |   No | Sponsor               |
+| student_id        | BIGINT UNSIGNED FK -> users.id |   No | Student               |
+| relationship_type | VARCHAR(100)                   |  Yes | Optional relationship |
+| status            | ENUM                           |   No | `active`, `inactive`  |
+| start_date        | DATE                           |  Yes | Start                 |
+| end_date          | DATE                           |  Yes | End                   |
+| created_at        | TIMESTAMP                      |   No | Created               |
+| updated_at        | TIMESTAMP                      |   No | Updated               |
 
 Constraint:
 
@@ -595,19 +595,19 @@ RM50
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | Schedule ID |
-| class_id | BIGINT UNSIGNED FK | No | Class |
-| class_participant_id | BIGINT UNSIGNED FK | No | Participant |
-| period_start | DATE | No | Payment period start |
-| period_end | DATE | No | Payment period end |
-| due_date | DATE | No | Payment due date |
-| required_amount | DECIMAL(12,2) | No | Required amount at generation |
-| status | ENUM | No | `upcoming`, `pending`, `partially_paid`, `paid`, `overdue`, `cancelled` |
-| generated_at | TIMESTAMP | No | Generated time |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field                | Type               | Null | Description                                                             |
+| -------------------- | ------------------ | ---: | ----------------------------------------------------------------------- |
+| id                   | BIGINT UNSIGNED PK |   No | Schedule ID                                                             |
+| class_id             | BIGINT UNSIGNED FK |   No | Class                                                                   |
+| class_participant_id | BIGINT UNSIGNED FK |   No | Participant                                                             |
+| period_start         | DATE               |   No | Payment period start                                                    |
+| period_end           | DATE               |   No | Payment period end                                                      |
+| due_date             | DATE               |   No | Payment due date                                                        |
+| required_amount      | DECIMAL(12,2)      |   No | Required amount at generation                                           |
+| status               | ENUM               |   No | `upcoming`, `pending`, `partially_paid`, `paid`, `overdue`, `cancelled` |
+| generated_at         | TIMESTAMP          |   No | Generated time                                                          |
+| created_at           | TIMESTAMP          |   No | Created                                                                 |
+| updated_at           | TIMESTAMP          |   No | Updated                                                                 |
 
 Relationship:
 
@@ -629,24 +629,24 @@ Represents an actual payment attempt/transaction against a payment schedule.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | Payment ID |
-| payment_schedule_id | BIGINT UNSIGNED FK | No | Payment obligation |
-| payer_id | BIGINT UNSIGNED FK | No | User making payment |
-| required_amount | DECIMAL(12,2) | No | Required amount |
-| additional_infaq | DECIMAL(12,2) | No | Extra contribution |
-| total_amount | DECIMAL(12,2) | No | Required + Infaq |
-| currency | CHAR(3) | No | `MYR` |
-| status | ENUM | No | `initiated`, `pending`, `processing`, `paid`, `failed`, `rejected`, `refunded`, `cancelled` |
-| payment_method | ENUM | No | `qr`, `merchant`, `bank_transfer`, `manual` |
-| paid_at | TIMESTAMP | Yes | Successful payment time |
-| verified_at | TIMESTAMP | Yes | Verification time |
-| verified_by | BIGINT UNSIGNED FK | Yes | Admin verifier |
-| reference_number | VARCHAR(150) | Yes | Internal reference |
-| notes | TEXT | Yes | Notes |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field               | Type               | Null | Description                                                                                             |
+| ------------------- | ------------------ | ---: | ------------------------------------------------------------------------------------------------------- |
+| id                  | BIGINT UNSIGNED PK |   No | Payment ID                                                                                              |
+| payment_schedule_id | BIGINT UNSIGNED FK |   No | Payment obligation                                                                                      |
+| payer_id            | BIGINT UNSIGNED FK |   No | User making payment                                                                                     |
+| required_amount     | DECIMAL(12,2)      |   No | Required amount                                                                                         |
+| additional_infaq    | DECIMAL(12,2)      |   No | Extra contribution                                                                                      |
+| total_amount        | DECIMAL(12,2)      |   No | Required + Infaq                                                                                        |
+| currency            | CHAR(3)            |   No | `MYR`                                                                                                   |
+| status              | ENUM               |   No | `initiated`, `pending`, `processing`, `paid`, `verified`, `failed`, `rejected`, `refunded`, `cancelled` |
+| payment_method      | ENUM               |   No | `qr`, `merchant`, `bank_transfer`, `manual`                                                             |
+| paid_at             | TIMESTAMP          |  Yes | Successful payment time                                                                                 |
+| verified_at         | TIMESTAMP          |  Yes | Verification time                                                                                       |
+| verified_by         | BIGINT UNSIGNED FK |  Yes | Admin verifier                                                                                          |
+| reference_number    | VARCHAR(150)       |  Yes | Internal reference                                                                                      |
+| notes               | TEXT               |  Yes | Notes                                                                                                   |
+| created_at          | TIMESTAMP          |   No | Created                                                                                                 |
+| updated_at          | TIMESTAMP          |   No | Updated                                                                                                 |
 
 Relationship:
 
@@ -692,23 +692,23 @@ One payment can have multiple transaction attempts.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| payment_id | BIGINT UNSIGNED FK | No | Payment |
-| gateway_name | VARCHAR(100) | No | Gateway/provider |
-| transaction_reference | VARCHAR(200) | Yes | Internal gateway transaction |
-| gateway_reference | VARCHAR(200) | Yes | Gateway reference |
-| request_amount | DECIMAL(12,2) | No | Amount sent |
-| response_status | VARCHAR(100) | Yes | Gateway status |
-| response_code | VARCHAR(100) | Yes | Gateway response |
-| response_message | TEXT | Yes | Gateway message |
-| request_payload | JSON | Yes | Raw request data |
-| response_payload | JSON | Yes | Raw response data |
-| initiated_at | TIMESTAMP | No | Start |
-| completed_at | TIMESTAMP | Yes | Completion |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field                 | Type               | Null | Description                  |
+| --------------------- | ------------------ | ---: | ---------------------------- |
+| id                    | BIGINT UNSIGNED PK |   No | ID                           |
+| payment_id            | BIGINT UNSIGNED FK |   No | Payment                      |
+| gateway_name          | VARCHAR(100)       |   No | Gateway/provider             |
+| transaction_reference | VARCHAR(200)       |  Yes | Internal gateway transaction |
+| gateway_reference     | VARCHAR(200)       |  Yes | Gateway reference            |
+| request_amount        | DECIMAL(12,2)      |   No | Amount sent                  |
+| response_status       | VARCHAR(100)       |  Yes | Gateway status               |
+| response_code         | VARCHAR(100)       |  Yes | Gateway response             |
+| response_message      | TEXT               |  Yes | Gateway message              |
+| request_payload       | JSON               |  Yes | Raw request data             |
+| response_payload      | JSON               |  Yes | Raw response data            |
+| initiated_at          | TIMESTAMP          |   No | Start                        |
+| completed_at          | TIMESTAMP          |  Yes | Completion                   |
+| created_at            | TIMESTAMP          |   No | Created                      |
+| updated_at            | TIMESTAMP          |   No | Updated                      |
 
 Relationship:
 
@@ -724,21 +724,21 @@ Used for manual bank-transfer verification.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| payment_id | BIGINT UNSIGNED FK | No | Payment |
-| file_path | VARCHAR(500) | No | File location |
-| original_filename | VARCHAR(255) | Yes | Original name |
-| mime_type | VARCHAR(100) | Yes | File type |
-| file_size | BIGINT | Yes | Size |
-| submitted_at | TIMESTAMP | No | Submission time |
-| reviewed_at | TIMESTAMP | Yes | Review time |
-| reviewed_by | BIGINT UNSIGNED FK | Yes | Admin |
-| status | ENUM | No | `pending`, `approved`, `rejected` |
-| rejection_reason | TEXT | Yes | Reason |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field             | Type               | Null | Description                       |
+| ----------------- | ------------------ | ---: | --------------------------------- |
+| id                | BIGINT UNSIGNED PK |   No | ID                                |
+| payment_id        | BIGINT UNSIGNED FK |   No | Payment                           |
+| file_path         | VARCHAR(500)       |   No | File location                     |
+| original_filename | VARCHAR(255)       |  Yes | Original name                     |
+| mime_type         | VARCHAR(100)       |  Yes | File type                         |
+| file_size         | BIGINT             |  Yes | Size                              |
+| submitted_at      | TIMESTAMP          |   No | Submission time                   |
+| reviewed_at       | TIMESTAMP          |  Yes | Review time                       |
+| reviewed_by       | BIGINT UNSIGNED FK |  Yes | Admin                             |
+| status            | ENUM               |   No | `pending`, `approved`, `rejected` |
+| rejection_reason  | TEXT               |  Yes | Reason                            |
+| created_at        | TIMESTAMP          |   No | Created                           |
+| updated_at        | TIMESTAMP          |   No | Updated                           |
 
 Relationship:
 
@@ -768,20 +768,20 @@ Stores in-app notifications.
 
 ## Fields
 
-| Field | Type | Null | Description |
-|---|---|---:|---|
-| id | BIGINT UNSIGNED PK | No | ID |
-| user_id | BIGINT UNSIGNED FK | No | Recipient |
-| type | VARCHAR(100) | No | Notification type |
-| title | VARCHAR(255) | No | Title |
-| message | TEXT | No | Message |
-| data | JSON | Yes | Additional data/deep-link data |
-| related_type | VARCHAR(100) | Yes | Related entity |
-| related_id | BIGINT | Yes | Related ID |
-| read_at | TIMESTAMP | Yes | Read time |
-| sent_at | TIMESTAMP | Yes | Sent time |
-| created_at | TIMESTAMP | No | Created |
-| updated_at | TIMESTAMP | No | Updated |
+| Field        | Type               | Null | Description                    |
+| ------------ | ------------------ | ---: | ------------------------------ |
+| id           | BIGINT UNSIGNED PK |   No | ID                             |
+| user_id      | BIGINT UNSIGNED FK |   No | Recipient                      |
+| type         | VARCHAR(100)       |   No | Notification type              |
+| title        | VARCHAR(255)       |   No | Title                          |
+| message      | TEXT               |   No | Message                        |
+| data         | JSON               |  Yes | Additional data/deep-link data |
+| related_type | VARCHAR(100)       |  Yes | Related entity                 |
+| related_id   | BIGINT             |  Yes | Related ID                     |
+| read_at      | TIMESTAMP          |  Yes | Read time                      |
+| sent_at      | TIMESTAMP          |  Yes | Sent time                      |
+| created_at   | TIMESTAMP          |   No | Created                        |
+| updated_at   | TIMESTAMP          |   No | Updated                        |
 
 Examples:
 
@@ -808,19 +808,19 @@ Tracks notification delivery through external channels.
 
 ## Fields
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| notification_id | BIGINT UNSIGNED FK |
-| channel | ENUM |
-| recipient | VARCHAR(255) |
-| status | ENUM |
-| provider_message_id | VARCHAR(255) NULL |
-| sent_at | TIMESTAMP NULL |
-| delivered_at | TIMESTAMP NULL |
-| error_message | TEXT NULL |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field               | Type               |
+| ------------------- | ------------------ |
+| id                  | BIGINT UNSIGNED PK |
+| notification_id     | BIGINT UNSIGNED FK |
+| channel             | ENUM               |
+| recipient           | VARCHAR(255)       |
+| status              | ENUM               |
+| provider_message_id | VARCHAR(255) NULL  |
+| sent_at             | TIMESTAMP NULL     |
+| delivered_at        | TIMESTAMP NULL     |
+| error_message       | TEXT NULL          |
+| created_at          | TIMESTAMP          |
+| updated_at          | TIMESTAMP          |
 
 Channels:
 
@@ -854,18 +854,18 @@ Stores mobile devices for push notifications.
 
 ## Fields
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| user_id | BIGINT UNSIGNED FK |
-| device_token | TEXT |
-| platform | ENUM(android, ios) |
-| device_name | VARCHAR(150) NULL |
-| app_version | VARCHAR(50) NULL |
-| last_seen_at | TIMESTAMP NULL |
-| status | ENUM(active, inactive) |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field        | Type                   |
+| ------------ | ---------------------- |
+| id           | BIGINT UNSIGNED PK     |
+| user_id      | BIGINT UNSIGNED FK     |
+| device_token | TEXT                   |
+| platform     | ENUM(android, ios)     |
+| device_name  | VARCHAR(150) NULL      |
+| app_version  | VARCHAR(50) NULL       |
+| last_seen_at | TIMESTAMP NULL         |
+| status       | ENUM(active, inactive) |
+| created_at   | TIMESTAMP              |
+| updated_at   | TIMESTAMP              |
 
 Relationship:
 
@@ -883,17 +883,17 @@ Stores reusable reminder messages.
 
 ## Fields
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| name | VARCHAR(100) |
-| notification_type | VARCHAR(100) |
-| channel | ENUM |
-| subject | VARCHAR(255) NULL |
-| body | TEXT |
-| status | ENUM(active, inactive) |
-| created_at | TIMESTAMP |
-| updated_at | TIMESTAMP |
+| Field             | Type                   |
+| ----------------- | ---------------------- |
+| id                | BIGINT UNSIGNED PK     |
+| name              | VARCHAR(100)           |
+| notification_type | VARCHAR(100)           |
+| channel           | ENUM                   |
+| subject           | VARCHAR(255) NULL      |
+| body              | TEXT                   |
+| status            | ENUM(active, inactive) |
+| created_at        | TIMESTAMP              |
+| updated_at        | TIMESTAMP              |
 
 Example:
 
@@ -919,18 +919,18 @@ Tracks important administrative and system actions.
 
 ## Fields
 
-| Field | Type |
-|---|---|
-| id | BIGINT UNSIGNED PK |
-| user_id | BIGINT UNSIGNED FK NULL |
-| action | VARCHAR(100) |
-| entity_type | VARCHAR(100) |
-| entity_id | BIGINT NULL |
-| old_values | JSON NULL |
-| new_values | JSON NULL |
-| ip_address | VARCHAR(45) NULL |
-| user_agent | TEXT NULL |
-| created_at | TIMESTAMP |
+| Field       | Type                    |
+| ----------- | ----------------------- |
+| id          | BIGINT UNSIGNED PK      |
+| user_id     | BIGINT UNSIGNED FK NULL |
+| action      | VARCHAR(100)            |
+| entity_type | VARCHAR(100)            |
+| entity_id   | BIGINT NULL             |
+| old_values  | JSON NULL               |
+| new_values  | JSON NULL               |
+| ip_address  | VARCHAR(45) NULL        |
+| user_agent  | TEXT NULL               |
+| created_at  | TIMESTAMP               |
 
 Examples:
 
@@ -1522,7 +1522,7 @@ Flutter may submit:
 
 ```json
 {
-  "additional_infaq": 20
+    "additional_infaq": 20
 }
 ```
 

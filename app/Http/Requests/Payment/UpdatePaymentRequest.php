@@ -17,7 +17,7 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['sometimes', 'in:initiated,pending,processing,paid,failed,rejected,refunded,cancelled'],
+            'status' => ['sometimes', 'in:initiated,pending,processing,paid,verified,failed,rejected,refunded,cancelled'],
             'notes' => ['nullable', 'string'],
         ];
     }
