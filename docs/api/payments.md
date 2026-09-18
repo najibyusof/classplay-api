@@ -17,7 +17,7 @@ Every endpoint requires `Authorization: Bearer {token}` (`auth:sanctum`) and exi
 | Method | Path                                                        | Purpose                                                  |
 | ------ | ----------------------------------------------------------- | -------------------------------------------------------- |
 | GET    | `/{student\|sponsor}/organizations`                         | Organizations of classes the user participates in        |
-| GET    | `/{student\|sponsor}/classes`                              | Classes the user actively participates in                |
+| GET    | `/{student\|sponsor}/classes`                               | Classes the user actively participates in                |
 | GET    | `/{student\|sponsor}/payment-schedules`                     | List own (or sponsored students') payment schedules      |
 | GET    | `/{student\|sponsor}/payment-schedules/current`             | The single most relevant unpaid/pending/overdue schedule |
 | GET    | `/{student\|sponsor}/payment-schedules/{schedule}`          | View one schedule                                        |
@@ -96,7 +96,7 @@ This prevents two near-simultaneous requests from both succeeding once one payme
 ## Resources
 
 - `PaymentResource` (reused) — `id`, `payment_schedule_id`, `payer`, `required_amount`, `additional_infaq`, `total_amount`, `currency`, `status`, `payment_method`, `paid_at`, `verified_at`, `verified_by`, `reference_number`, `notes`. Never includes `password` or Sanctum tokens (enforced by `UserResource`'s own field list, used for the nested `payer`).
-- `PaymentScheduleResource` (enriched this phase) — adds `class` (`id`, `name`), `payment_status` (derived from the most recent payment attempt, when loaded), and `payment_options` (currency, infaq rules, bank/QR/merchant details from `class_payment_settings`) alongside the existing `period_start`/`period_end`/`due_date`/`required_amount`/`status` fields. Never includes other participants.
+- `PaymentScheduleResource` (enriched this phase) — adds `class` (`id`, `name`), `participant` (`name`, `phone` of the schedule's `class_participant`, when loaded — shown on `GET /classes/{class}/payment-schedules` and `GET /payment-schedules/{paymentSchedule}` for admin views), `payment_status` (derived from the most recent payment attempt, when loaded), and `payment_options` (currency, infaq rules, bank/QR/merchant details from `class_payment_settings`) alongside the existing `period_start`/`period_end`/`due_date`/`required_amount`/`status` fields. Never includes other participants.
 
 ## Response format
 

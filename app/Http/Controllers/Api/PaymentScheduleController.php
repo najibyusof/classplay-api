@@ -26,7 +26,9 @@ class PaymentScheduleController extends Controller
     {
         $this->authorize('view', $class);
 
-        return PaymentScheduleResource::collection($class->paymentSchedules()->paginate());
+        return PaymentScheduleResource::collection(
+            $class->paymentSchedules()->with('classParticipant.user')->paginate()
+        );
     }
 
     public function store(StorePaymentScheduleRequest $request, ClassModel $class): PaymentScheduleResource
@@ -45,7 +47,7 @@ class PaymentScheduleController extends Controller
     {
         $this->authorize('view', $paymentSchedule);
 
-        return new PaymentScheduleResource($paymentSchedule->load(['classModel.paymentSetting', 'payments']));
+        return new PaymentScheduleResource($paymentSchedule->load(['classModel.paymentSetting', 'classParticipant.user', 'payments']));
     }
 
     public function update(UpdatePaymentScheduleRequest $request, PaymentSchedule $paymentSchedule): PaymentScheduleResource

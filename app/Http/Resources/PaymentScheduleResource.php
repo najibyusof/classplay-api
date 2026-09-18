@@ -22,6 +22,10 @@ class PaymentScheduleResource extends JsonResource
                 'name' => $this->classModel->name,
             ]),
             'class_participant_id' => $this->class_participant_id,
+            'participant' => $this->whenLoaded('classParticipant', fn () => $this->classParticipant->user ? [
+                'name' => $this->classParticipant->user->name,
+                'phone' => $this->classParticipant->user->phone,
+            ] : null),
             'period_start' => $this->period_start,
             'period_end' => $this->period_end,
             'due_date' => $this->due_date,
