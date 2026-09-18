@@ -24,6 +24,7 @@ class ClassPaymentSettingResource extends JsonResource
             'bank_account_name' => $this->bank_account_name,
             'bank_account_number' => $this->bank_account_number,
             'qr_code_path' => $this->qr_code_path,
+            'qr_code_url' => $this->qr_code_url,
             'merchant_payment_url' => $this->merchant_payment_url,
             'allow_additional_infaq' => $this->allow_additional_infaq,
             'minimum_infaq' => $this->minimum_infaq,

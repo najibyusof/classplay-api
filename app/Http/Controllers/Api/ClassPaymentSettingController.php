@@ -12,6 +12,7 @@ use App\Models\ClassModel;
 use App\Models\ClassPaymentSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ClassPaymentSettingController extends Controller
 {
@@ -80,5 +81,19 @@ class ClassPaymentSettingController extends Controller
             new ClassPaymentSettingResource($setting),
             'QR code uploaded successfully.'
         );
+    }
+
+    /**
+     * Stream the QR code image directly through the application instead of relying
+     * on the web server serving the `public/storage` symlink, so a missing symlink
+     * or static-file permission issue on the host cannot break viewing.
+     */
+    public function streamQrCode(ClassModel $class): StreamedResponse
+    {
+        $setting = $class->paymentSetting()->first();
+
+        abort_if(! $setting?->qr_code_path || ! Storage::disk('public')->exists($setting->qr_code_path), 404);
+
+        return Storage::disk('public')->response($setting->qr_code_path);
     }
 }

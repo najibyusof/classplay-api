@@ -210,13 +210,14 @@ Returns the updated class using the same shape as the view response above.
 
 ## 3. Class Payment Settings
 
-| Method       | Endpoint                                          | Authorization              | Description                                                                                                      |
-| ------------ | ------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `GET`        | `/api/v1/classes/{class}/payment-setting`         | `class.view`               | View payment configuration for a class                                                                           |
-| `POST`       | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Create payment configuration                                                                                     |
-| `PUT\|PATCH` | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Update payment configuration                                                                                     |
-| `DELETE`     | `/api/v1/classes/{class}/payment-setting`         | `class.update` & Org Admin | Delete payment configuration                                                                                     |
-| `POST`       | `/api/v1/classes/{class}/payment-setting/qr-code` | `class.update` & Org Admin | Upload DuitNow / Touch 'n Go QR code image (`multipart/form-data`, field `qr_code`, JPG/JPEG/PNG/WEBP, max 2 MB) |
+| Method       | Endpoint                                               | Authorization              | Description                                                                                                      |
+| ------------ | ------------------------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `GET`        | `/api/v1/classes/{class}/payment-setting`              | `class.view`               | View payment configuration for a class                                                                           |
+| `POST`       | `/api/v1/classes/{class}/payment-setting`              | `class.update` & Org Admin | Create payment configuration                                                                                     |
+| `PUT\|PATCH` | `/api/v1/classes/{class}/payment-setting`              | `class.update` & Org Admin | Update payment configuration                                                                                     |
+| `DELETE`     | `/api/v1/classes/{class}/payment-setting`              | `class.update` & Org Admin | Delete payment configuration                                                                                     |
+| `POST`       | `/api/v1/classes/{class}/payment-setting/qr-code`      | `class.update` & Org Admin | Upload DuitNow / Touch 'n Go QR code image (`multipart/form-data`, field `qr_code`, JPG/JPEG/PNG/WEBP, max 2 MB) |
+| `GET`        | `/api/v1/classes/{class}/payment-setting/qr-code-file` | None (public)              | Streams the QR code image directly; unauthenticated                                                              |
 
 ### QR code upload
 
@@ -239,12 +240,15 @@ Success response (`200 OK`):
     "data": {
         "id": 10,
         "class_id": 10,
-        "qr_code_path": "qr-codes/abc123.png"
+        "qr_code_path": "qr-codes/abc123.png",
+        "qr_code_url": "http://localhost/api/v1/classes/10/payment-setting/qr-code-file"
     }
 }
 ```
 
 Missing or invalid files return `422`; users without `class.update` permission or organization access receive `403`.
+
+`qr_code_url` (returned on every payment-setting response, including `GET`) points at `GET /api/v1/classes/{class}/payment-setting/qr-code-file` rather than the raw `/storage/...` path, so viewing the QR code does not depend on the web server's `public/storage` symlink or static-file permissions — the file is streamed by the application itself, the same way [organization logos](organizations.md) are served. That endpoint requires no authentication (meant to be opened directly in a browser or `<img>` tag) and returns `404` when no QR code is uploaded or the stored file is missing.
 
 ### Payment Setting Body Example (`POST /api/v1/classes/10/payment-setting`)
 

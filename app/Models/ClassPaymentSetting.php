@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,16 @@ class ClassPaymentSetting extends Model
         'reminder_days_before',
         'reminder_days_after',
     ];
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function qrCodeUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?string => $this->qr_code_path ? route('v1.classes.payment-setting.qr-code-file', $this->class_id) : null,
+        );
+    }
 
     protected function casts(): array
     {
