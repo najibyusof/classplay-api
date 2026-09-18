@@ -13,6 +13,7 @@ use App\Models\SponsorStudent;
 use App\Services\Payment\PaymentScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class ClassController extends Controller
@@ -138,10 +139,34 @@ class ClassController extends Controller
     {
         $this->authorize('update', $class);
 
-        $class->update($request->validated());
+        $validated = $request->validated();
+
+        DB::transaction(function () use ($class, $validated): void {
+            // recurrence_type is the request field name; ClassModel stores it as `frequency`.
+            $classData = Arr::except($validated, 'recurrence_type');
+            if (array_key_exists('recurrence_type', $validated)) {
+                $classData['frequency'] = $validated['recurrence_type'];
+            }
+            $class->update($classData);
+
+            if (array_intersect(['day_of_week', 'start_time', 'recurrence_type'], array_keys($validated)) !== []) {
+                $class->schedules()->first()?->update(array_filter([
+                    'day_of_week' => $validated['day_of_week'] ?? null,
+                    'start_time' => $validated['start_time'] ?? null,
+                    'recurrence_type' => $validated['recurrence_type'] ?? null,
+                ], fn ($value) => $value !== null));
+            }
+
+            if (array_intersect(['payment_amount', 'recurrence_type'], array_keys($validated)) !== []) {
+                $class->paymentSetting?->update(array_filter([
+                    'required_amount' => $validated['payment_amount'] ?? null,
+                    'payment_frequency' => $validated['recurrence_type'] ?? null,
+                ], fn ($value) => $value !== null));
+            }
+        });
 
         return $this->successResponse(
-            new ClassResource($class),
+            new ClassResource($class->fresh(['schedules', 'paymentSetting'])),
             'Class updated successfully.'
         );
     }

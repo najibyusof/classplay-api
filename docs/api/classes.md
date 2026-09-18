@@ -180,18 +180,22 @@ Returns a single class. The schedule (`day_of_week`, `start_time`, `frequency`) 
 
 ### Update Class (`PUT|PATCH /api/v1/organizations/{organization}/classes/{class}`)
 
-All update fields are optional. Only these attributes are updatable through this endpoint; schedule (`day_of_week`, `start_time`, `recurrence_type`) and `payment_amount` are managed via the class-schedule and payment-setting endpoints (sections 2 and 3), not the class update route.
+All update fields are optional (`sometimes`) and accept the same fields as class creation (section 1). Sending `day_of_week`, `start_time`, or `recurrence_type` also updates the class's primary schedule (`class_schedules`); sending `payment_amount` or `recurrence_type` also updates the payment setting's `required_amount`/`payment_frequency` (`class_payment_settings`), keeping the class and its related records in sync. Additional schedules or bank/QR/infaq details are still managed via the class-schedule and payment-setting endpoints (sections 2 and 3).
 
 #### Request Body
 
-| Field          | Type   | Required | Description                                |
-| -------------- | ------ | -------- | ------------------------------------------ |
-| `name`         | string | No       | Class name, max 150 chars                  |
-| `description`  | string | No       | Free-text description                      |
-| `teacher_name` | string | No       | Teacher name, max 150 chars                |
-| `status`       | string | No       | `draft`, `active`, `inactive`, `completed` |
-| `start_date`   | date   | No       | First day of the class                     |
-| `end_date`     | date   | No       | Last day; must be on/after `start_date`    |
+| Field             | Type    | Required | Description                                                           |
+| ----------------- | ------- | -------- | --------------------------------------------------------------------- |
+| `name`            | string  | No       | Class name, max 150 chars                                             |
+| `description`     | string  | No       | Free-text description                                                 |
+| `teacher_name`    | string  | No       | Teacher name, max 150 chars                                           |
+| `status`          | string  | No       | `draft`, `active`, `inactive`, `completed`                            |
+| `start_date`      | date    | No       | First day of the class                                                |
+| `end_date`        | date    | No       | Last day; must be on/after `start_date`                               |
+| `day_of_week`     | integer | No       | Session day: `0` = Sunday … `6` = Saturday                            |
+| `start_time`      | string  | No       | Session start time, `HH:MM` 24-hour format (e.g. `10:00`)             |
+| `recurrence_type` | string  | No       | `weekly`, `fortnightly`, or `monthly`; also updates payment frequency |
+| `payment_amount`  | number  | No       | Required payment amount in MYR                                        |
 
 Returns the updated class using the same shape as the view response above.
 

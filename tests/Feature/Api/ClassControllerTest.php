@@ -251,4 +251,43 @@ class ClassControllerTest extends TestCase
             ->assertJsonPath('data.name', 'Updated Class')
             ->assertJsonPath('data.organization_id', $organization->id);
     }
+
+    public function test_updating_schedule_and_payment_fields_propagates_to_schedule_and_payment_setting(): void
+    {
+        $organization = Organization::factory()->create();
+        $admin = $this->organizationAdmin($organization);
+
+        $created = $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/v1/organizations/{$organization->id}/classes", $this->validClassPayload())
+            ->assertCreated();
+        $class = ClassModel::query()->findOrFail($created->json('data.id'));
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->patchJson("/api/v1/organizations/{$organization->id}/classes/{$class->id}", [
+                'day_of_week' => 3,
+                'start_time' => '16:30',
+                'recurrence_type' => 'monthly',
+                'payment_amount' => 120,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.day_of_week', 3)
+            ->assertJsonPath('data.frequency', 'monthly')
+            ->assertJsonPath('data.payment_amount', '120.00')
+            ->assertJsonPath('data.schedules.0.day_of_week', 3)
+            ->assertJsonPath('data.schedules.0.recurrence_type', 'monthly')
+            ->assertJsonPath('data.payment_setting.payment_frequency', 'monthly')
+            ->assertJsonPath('data.payment_setting.required_amount', '120.00');
+
+        $this->assertDatabaseHas('class_schedules', [
+            'class_id' => $class->id,
+            'day_of_week' => 3,
+            'recurrence_type' => 'monthly',
+        ]);
+        $this->assertDatabaseHas('class_payment_settings', [
+            'class_id' => $class->id,
+            'required_amount' => 120.00,
+            'payment_frequency' => 'monthly',
+        ]);
+    }
 }
